@@ -1,0 +1,4 @@
+chip detection
+
+CPUID register (not available when core clock is off)
+CMSIS: SCB_Type->CPUID

@@ -1,0 +1,57 @@
+= Problem
+gdb "load", "break", MCU memorymap and linker scripts that assume to run from FLASH
+If gdb doesn't receive a memory map from the gdbserver its talking to (OpenOCD, pyOCD, texan/stlink etc), "load", "break" wouldn't work,
+since those commands need special handling for flash memory ranges.
+gdb "load" further needs a working flash algorithm.
+
+== Possible Solutions
+* Generic Cortex-M memorymap
+** Make OpenOCD send a generic Cortex-M memory map assuming no interrupt vector relocation.
+** Load generic Cortex-M memory map through gdb command
+==> External RAM and FLASH won't work
+
+= Cortex-M Hardware Autodetection Work Flow
+
+* Debug adapter USB IDs (DONE)
+* Cortex-M DAP idcode (in progress)
+	hla idcode (HACK DONE, hla_interface.c jim_idcode)
+	dap idcode (OpenOCD arm_adi_v5.c)
+
+* Differentiate Cortex-M Silicon Vendors (How?)
+** ROM table? "Not much help"
+
+(CMSIS-DAP expert, ARM FAE) Sam Grove: use the vendor specific device ID registers (read only)
+If you're just trying to differentiate the big 5 silicon vendors, it should work.
+To get more details about the chip, bring the CPU up, halt it then you can probe the hardware even more.
+Connect under reset so that the MCU is in a known state:
+	* interrupt vector at default location
+	* GPIO pinmux allows SWD/JTAG
+	* registers contain reset values).
+
+== Vendor Specific Device ID Registers
+	* STM32 (see documentation/STM32)
+	** DBGMCU_IDCODE register @0xE0042000, readable even if CPU is down (decode code DONE)
+	** See also OpenOCD: stm32f2x.c
+
+	* TI Tiva, Stellaris (see documentation/TI-Tiva-Stellaris)
+	** DID0 register @0x400FE000
+	** DID1 register @0x400FE004
+
+	* NXP LPC
+	** lpc11xx: DEVICE_ID register at 0x400483F4 (only valid for parts of the lpc1100, 1100c, 1100l series)
+	** lpc1100xl, IAP command, can't use DEVICE_ID register 
+
+	* Nordic
+	** nRF51 Series:
+
+	* Freescale?
+
+	* Atmel?
+
+* Connect while asserting reset by default
+Or connect immediately after reset for LPC 8xx (tweak adapter_nrst_delay)
+Add a separate "attach" command that doesn't reset the target
+
+Connecting under reset makes the debug environment more predictable:
+** Reset SWD / JTAG GPIO pins to debug state
+** Reset interrupt vector location

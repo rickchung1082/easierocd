@@ -1,0 +1,32 @@
+= Probe Point Workflow
+* Write C code that read input from some global array
+*C Debug Trick: Static Probe Points
+**	Probe points are like breakpoints with names
+**	Try to keep them "stable" during developmetn
+* Place a "ready-for-input" static probe point
+* Place a "output-ready" static probe point
+* With a single commandd:
+	Comple and run program on target
+	Hit "ready-for-input"
+	Write to global array through Python
+	Continue program execution
+	Hit "output-ready"
+	Read back to Python to verify, analyze, visualize the result
+
+= Debugger Call Workflow
+* Probe points with arguments look a lot like system calls 
+	You can pass arguments just by agreeing on a convention of always placing them in certain registers or memory locations
+
+Demo 1:
+	Generate PCM waveform in Python, play it back on an embedded board
+
+Demo 2:
+
+Demo 3:
+
+== Hardware and Environment Setup Experience
+
+== Development Experience
+* Goal: make iterative uC development while generaing, verifying, visualizing data from Python pleasant
+==> Look into FLASH delta updates to speed up edit-compile-run cycle
+** Two modes of interaction: call uC functions from Python, or feed data at breakpoints

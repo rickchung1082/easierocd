@@ -1,0 +1,16 @@
+* openocd -c noinit
+	> exit
+	The 'exit' command must be used after 'init'.
+
+* Disconnect USB debug adapter using SWD transport after succesful init
+	TCL RPC responds with '' to many commands
+	Wish list: command to query adapter connection
+	Event hook for polling failure
+
+* ARM Semihosting messages are too slow
+	Obviously slower than stlink
+	Similar request from OpenOCD user: Slow DCC message: How to increase polling frequency? (https://www.mail-archive.com/openocd-development@lists.berlios.de/msg13746.html)
+
+* (Likely gdb issue)
+	GDB stepi (single instruction step) can't step over "bkpt 0xAB" instruction used to issue ARM semihosting syscall
+

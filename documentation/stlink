@@ -1,0 +1,12 @@
+texane/stlink: stlink_load_device_params()
+	void _stlink_usb_core_id()
+
+OpenOCD's implementation only support Cortex-M's
+	See:
+		icdi_usb_override_target (STLink)  / icdi_usb_override_target (TI ICDI)
+		hl_interface_override_target
+		target_create
+	Given the "high level" nature of the USB protocol, this seems appropriate.
+	ST's tools support STM8 MCUs in addition to Cortex-M
+
+stlink under OpenOCD goes through the "hla_target" layer, see hla_target.c

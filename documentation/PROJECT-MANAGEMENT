@@ -1,0 +1,38 @@
+== Mile Stone 1: Current OpenOCD Functionality plus Autodetection
+
+Supported Hardware:
+1. ST-Link/V2   <-> SWD <-> Jack Pair 
+2. ST-Link/V2-1 <-> SWD <-> ST Nucleo L152RE Board
+3. ST-Link/V2   <-> SWD <-> ST32F429I Discovery Board
+(Nice to Have)
+4. ST-Link/V2-1 (Nucleo Board ) <-> SWD <-> ST32F429I Discovery Board
+5. ST-Link/V2   (Disovery Board) <-> SWD <-> ST Nucleo Board
+
+Development Features:
+* Flash Programming (starting per adapter OpenOCD daemon as needed)
+* gdb (starting per adapter OpenOCD daemon as needed)
+
+== Mile Stone 2: Cortex-M Development Oriented Featuers
+
+Development Features:
+* ARM Semihosting file I/O limited to shared-folder
+* Python <-> GDB <-> Target CPU global data access
+* ARM Semihosting stdio from telnet server
+
+== Mile Stone 3: SWV
+
+Development Features:
+* ARM SWO (channel 0) stdio (ITM_{Send,Get}Char) from telnet server
+* ARM SWO channels dynamic on/off from local sockets
+* ARM SWV global variable sampling
+
+== Mile Stone 4: SWV CPU and Wakeup Profiling
+
+* ARM SWV program counter sampling
+* ARM SWV wakeup sampling
+
+== Mile Stone X: Nice to Haves
+
+Development Features:
+* ARM Semihosting CLI binary loader
+	* easierocd-load ELF arg [arg...]

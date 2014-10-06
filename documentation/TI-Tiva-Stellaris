@@ -1,0 +1,25 @@
+Tiva C Series TM4C123GH6PM Data Sheet
+Section 5.2.1 Device Identification
+
+DID0, DID1 registers: device version, package, temperature range
+PPWD etc: (System Control 0x300) how many of each kind of peripheral (e.g. watch dog) are present
+
+"information about the capabilities of the on-chip peripherals are provided at offset 0xFC0 in each peripheral's register space in the Peripheral Properties registers, such as the GPTM Peripheral
+Properties (GPTMPP) register. Previous devices used the Device Capabilities (DC0-DC9) registers for information about the peripherals and their capabilities. These registers are present on this device for backward software capability, but provide no information about peripherals that were not available
+on older devices"
+	
+The DID0 register identifies the version of the microcontroller
+Table 1. Tiva™ C Series TM4C123x Silicon Revision Codes
+MAJOR MINOR Die Revision Silicon Revision Bit Field Value Bit Field Value
+0x0 0x0 A0 1
+0x0 0x1 A1 2
+0x0 0x2 A2 3
+0x0 0x3 A3 4
+0x1 0x0 B0 5
+0x1 0x1 B1 6
+0x1 0x2 B2 7
+
+Register 2: Device Identification 1 (DID1), offset 0x004
+This register identifies the device family, part number, temperature range, pin count, and package
+type. Each microcontroller is uniquely identified by the combined values of the CLASS field in the
+DID0 register and the PARTNO field in the DID1 register.

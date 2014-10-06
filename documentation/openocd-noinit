@@ -1,0 +1,11 @@
+http://sourceforge.net/p/openocd/mailman/openocd-devel/thread/1259536149-20664-1-git-send-email-zw@superlucidity.net/
+
+* Example of starting servers dynamically:
+or1k serial over JTAG (jsp_server.c)
+http://sourceforge.net/p/openocd/mailman/openocd-devel/?viewmonth=201406&viewday=5
+
+* Recover from USB debug adapter unplug
+** Missing mechanism: hook USB debug adapter unplug event
+** (alternative) Watching for USB device unplug independent from OpenOCD. Easy enough on Linux
+** Re-open debug adapter interface and re-do OpenOCD init
+** (alternative) Shutdown then restart OpenOCD

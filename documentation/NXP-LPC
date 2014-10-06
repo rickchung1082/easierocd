@@ -1,0 +1,81 @@
+UM10398_User manual.pdf (LPC1114FN28)
+
+== DEVICE_ID register
+The DEVICE_ID register is valid 0x4004 83F4 for parts of the LPC1100, LPC1100C, and
+LPC1100L series only.
+The device ID cannot be read through the SYSCON block for the LPC1100XL series. Use
+the ISP part ID command (Table 400) to obtain the device ID for the LPC1100XL parts.
+
+''' 3.5.37 Device ID register
+This device ID register is a read-only register and contains the part ID for each
+LPC111x/LPC11Cxx part. This register is also read by the ISP/IAP commands
+(Section 26.5.11).
+Remark: This register returns the part ID for parts of the LPC1100, LPC1100C, and
+LPC1100L series only. Use ISP/IAP to obtain the part ID for the LPC1100XL series.
+The part IDs for the various parts are shown in the following list. Some parts have two
+valid part IDs.
+• LPC1110
+– 0x0A07 102B = LPC1110FD20
+– 0x1A07 102B = LPC1110FD20
+• LPC1111
+– 0x0A16 D02B = LPC1111FDH20/002
+– 0x1A16 D02B = LPC1111FDH20/002
+– 0x041E 502B = LPC1111FHN33/101
+– 0x2516 D02B = LPC1111FHN33/101; LPC1111FHN33/102
+– 0x0416 502B = LPC1111FHN33/201
+– 0x2516 902B = LPC1111FHN33/201; LPC1111FHN33/202
+• LPC1112
+– 0x0A24 902B = LPC1112FD20/102; LPC1112FDH20/102; LPC1112FDH28/102
+– 0x1A24 902B = LPC1112FD20/102; LPC1112FDH20/102; LPC1112FDH28/102
+– 0x042D 502B = LPC1112FHN33/101
+– 0x2524 D02B = LPC1112FHN33/101; LPC1112FHN33/102
+– 0x0425 502B = LPC1112FHN33/201
+– 0x2524 902B = LPC1112FHN33/201; LPC1112FHN33/202; LPC1112FHI33/202; LPC1112FHN24/202
+• LPC1113
+– 0x0434 502B = LPC1113FHN33/201
+– 0x2532 902B = LPC1113FHN33/201; LPC1113FHN33/202
+– 0x0434 102B = LPC1113FHN33/301; LPC1113FBD48/301
+– 0x2532 102B = LPC1113FHN33/301; LPC1113FHN33/302; LPC1113FBD48/301; LPC1113FBD48/302
+• LPC1114
+– 0x0A40 902B = LPC1114FDH28/102; LPC1114FN28/102
+– 0x1A40 902B = LPC1114FDH28/102; LPC1114FN28/102
+– 0x0444 502B = LPC1114FHN33/201
+– 0x2540 902B = LPC1114FHN33/201; LPC1114FHN33/202
+– 0x0444 102B = LPC1114FHN33/301; LPC1114FBD48/301
+– 0x2540 102B = LPC1114FHN33/301; LPC1114FHN33/302; LPC1114FHI33/302; LPC1114FBD48/301; LPC1114FBD48/302; LPC11D14FBD100/302
+• LPC11Cxx
+– 0x1440 102B = LPC11C14/FBD48/301
+– 0x1431 102B = LPC11C22/FBD48/301
+– 0x1430 102B = LPC11C24/FBD48/301
+'''
+
+
+== IAP Commands
+Calling convention:
+R0 points to command and parameters (max 5 params),
+return value in memory pointed to by R1 (max 4 results).
+The IAP routine is located @0x1FFF1FF0 (thumb code)
+
+	define IAP_LOCATION 0x1fff1ff1
+	unsigned int command_param[5];
+	unsigned int status_result[4];
+	IAP iap_entry;
+	iap_entry=(IAP) IAP_LOCATION;
+	iap_entry (command_param,status_result);
+
+Preserve top 32 bytes of on-chip RAM for IAP use.
+
+"The flash memory is not accessible during a write or erase operation. IAP commands,
+which results in a flash write/erase operation, use 32 bytes of space in the top portion of
+the on-chip RAM for execution. The user program should not be use this space if IAP flash
+programming is permitted in the application."
+
+''' 26.7.5 Read Part Identification number (IAP)
+Table 400. IAP Read Part Identification command
+Command Read part identification number
+Input Command code: 54 (decimal)
+      Parameters: None
+Status Code CMD_SUCCESS |
+Result
+	Result0: Part Identification Number. (scottt: should be 4 bytes)
+Description This command is used to read the part identification number. '''

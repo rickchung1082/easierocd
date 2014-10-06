@@ -1,0 +1,48 @@
+--- openocd-cortex_m.c	2014-09-24 21:54:13.646494924 -0700
++++ openocd-hla_target.c	2014-09-24 21:54:16.518524191 -0700
+@@ -1,29 +1,28 @@
+-struct target_type cortexm_target = {
+-	.name = "cortex_m",
+-	.deprecated_name = "cortex_m3",
++struct target_type hla_target = {
++	.name = "hla_target",
++	.deprecated_name = "stm32_stlink",
+ 
+-	.init_target = cortex_m_init_target,
+-	.target_create = cortex_m_target_create,
++	.init_target = adapter_init_target,
++	.target_create = adapter_target_create,
+ 	.examine = cortex_m_examine,
+-	.commands = cortex_m_command_handlers,
++	.commands = adapter_command_handlers,
+ 
+-	.poll = cortex_m_poll,
++	.poll = adapter_poll,
+ 	.arch_state = armv7m_arch_state,
+ 
+-	.target_request_data = cortex_m_target_request_data,
++	.target_request_data = hl_target_request_data,
+ 
+-	.halt = cortex_m_halt,
+-	.resume = cortex_m_resume,
+-	.step = cortex_m_step,
+-
+-	.assert_reset = cortex_m_assert_reset,
+-	.deassert_reset = cortex_m_deassert_reset,
+-	.soft_reset_halt = cortex_m_soft_reset_halt,
++	.halt = adapter_halt,
++	.resume = adapter_resume,
++	.step = adapter_step,
++
++	.assert_reset = adapter_assert_reset,
++	.deassert_reset = adapter_deassert_reset,
+ 
+ 	.get_gdb_reg_list = armv7m_get_gdb_reg_list,
+ 
+-	.read_memory = cortex_m_read_memory,
+-	.write_memory = cortex_m_write_memory,
++	.read_memory = adapter_read_memory,
++	.write_memory = adapter_write_memory,
+ 	.checksum_memory = armv7m_checksum_memory,
+ 	.blank_check_memory = armv7m_blank_check_memory,
+ 

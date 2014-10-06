@@ -1,0 +1,6 @@
+openocd -d3 \
+-f interface/stlink-v2-1.cfg \
+-c 'transport select hla_swd' \
+-c 'adapter_khz 300' \
+-c 'hla newtap MYCHIP cpu -irlen 0x4 -ircapture 0x1 -irmask 0xf -expected-id 0x00000000' \
+-c 'target create MYCHIP.cpu cortex_m -chain-position MYCHIP.cpu'

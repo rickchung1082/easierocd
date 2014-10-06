@@ -1,0 +1,21 @@
+SWD IDCODE: Try to accomplish "SWDReadDP 0"
+
+OpenOCD: jlink.c
+
+Segger's public documentation:
+Reference manual for J-Link USB Protocol
+Document RM08001-R6 Date: June 16, 2009
+(Or newer, with some SWD information).
+http://www.segger.com/cms/admin/uploads/productDocs/RM08001_JLinkUSBProtocol.pdf
+
+Info on SWD and JLink
+http://cdn.energymicro.com/dl/an/pdf/an0062_efm32_programming_guide.pdf
+"sample JLink Commander session in where the IDCODE and IDR registers are read. Note that
+when reading the AP IDR register, a dummy read is performed first, followed by reading the actual value
+from the DP RDBUFF register"
+	> SWDReadDP 0
+	Read DP Register 0 = 0x2BA01477 # IDCODE
+
+	SWDWriteDP 2 0x000000f0
+	SWDReadAP 3
+	SWDReadDP 3

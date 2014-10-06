@@ -1,0 +1,9 @@
+* Cortex-M DAP autodetection
+	hla apid
+	dap apid (http://openocd.sourceforge.net/doc/html/Architecture-and-Core-Commands.html#index-Debug-Access-Port-499)
+Related feature requiest by OpenOCD contributor: https://www.mail-archive.com/openocd-devel@lists.sourceforge.net/msg06233.html
+
+* OpenOCD Manual: "When you start the server without any TAPs configured, it will attempt to autoconfigure the TAPs. There are two parts to this ...."
+How's this implemented? Adapt for SWD IDCODE scan
+
+http://openocd.sourceforge.net/doc/html/TAP-Declaration.html#autoprobing

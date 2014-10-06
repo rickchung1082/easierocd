@@ -1,0 +1,871 @@
+Reading symbols from /home/scottt/Dropbox/lpc1114fn28/lpc1114-add/out/lpc1114-add.elf...done.
+Disassemble a specified section of memory.
+Default is the function surrounding the pc of the selected frame.
+With a /m modifier, source lines are included (if available).
+With a /r modifier, raw instructions in hex are included.
+With a single argument, the function surrounding that address is dumped.
+Two arguments (separated by a comma) are taken as a range of memory to dump,
+  in the form of "start,end", or "start,+length".
+
+Note that the address is interpreted as an expression, not as a location
+like in the "break" command.
+So, for example, if you want to disassemble function bar in file foo.c
+you must type "disassemble 'foo.c'::bar" and not "disassemble foo.c:bar".
+Continuing.
+
+Program received signal SIGINT, Interrupt.
+0x000001d8 in main () at main.c:88
+88	main.c: No such file or directory.
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+Bad format string, missing '"'.
+857032 1000000
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001dc	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+=> 0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001de	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+=> 0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+857032 857033
+0x000001e0	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001d8	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+=> 0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001da	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+=> 0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+857033 857033
+857033 1000000
+Note: automatically using hardware breakpoints for read-only addresses.
+0x000001e0 in main () at main.c:88
+88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+=> 0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+$1 = 857035
+$2 = 1000001
+0x000001e2	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+=> 0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+   0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+0x000001e4	88	in main.c
+   0x000001ce <main+170>:	02 95	str	r5, [sp, #8]
+   0x000001d0 <main+172>:	02 9a	ldr	r2, [sp, #8]
+   0x000001d2 <main+174>:	03 9b	ldr	r3, [sp, #12]
+   0x000001d4 <main+176>:	9a 42	cmp	r2, r3
+   0x000001d6 <main+178>:	06 d2	bcs.n	0x1e6 <main+194>
+   0x000001d8 <main+180>:	02 9b	ldr	r3, [sp, #8]
+   0x000001da <main+182>:	01 33	adds	r3, #1
+   0x000001dc <main+184>:	02 93	str	r3, [sp, #8]
+   0x000001de <main+186>:	02 9a	ldr	r2, [sp, #8]
+   0x000001e0 <main+188>:	03 9b	ldr	r3, [sp, #12]
+   0x000001e2 <main+190>:	9a 42	cmp	r2, r3
+=> 0x000001e4 <main+192>:	f8 d3	bcc.n	0x1d8 <main+180>
+90	in main.c
+=> 0x000001e6 <main+194>:	35 60	str	r5, [r6, #0]
+Read commands from a file named FILE.
+
+Usage: source [-s] [-v] FILE
+-s: search for the script in the source search path,
+    even if FILE contains directories.
+-v: each command in FILE is echoed as it is executed.
+
+Note that the file ".gdbinit" is read automatically in this way
+when GDB is started.
+quit
+Remote connection closed
+quit
+#0  adapter_init (cmd_ctx=0x85f030) at core.c:1343
+#1  0x0000000000405648 in handle_init_command (cmd=0x7fffffffccc0) at openocd.c:131
+#2  0x0000000000442f6b in run_command (num_words=1, words=0x8a6da0, c=0x892f70, context=0x85f030) at command.c:613
+#3  script_command_run (interp=0x85f070, argc=<optimized out>, argv=<optimized out>, c=0x892f70, capture=<optimized out>) at command.c:210
+#4  0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=1, objv=objv@entry=0x7fffffffcdc0) at jim.c:10184
+#5  0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x8a6ef0) at jim.c:10640
+#6  0x000000000051df35 in Jim_EvalCoreCommand (interp=0x85f070, argc=<optimized out>, argv=<optimized out>) at jim.c:12914
+#7  0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=3, objv=objv@entry=0x7fffffffcee0) at jim.c:10184
+#8  0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x892180) at jim.c:10640
+#9  0x000000000051d4e0 in Jim_CatchCoreCommand (interp=0x85f070, argc=1, argv=0x7fffffffd068) at jim.c:13897
+#10 0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=2, objv=objv@entry=0x7fffffffd060) at jim.c:10184
+#11 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x891ad0) at jim.c:10640
+#12 0x000000000051a7a3 in Jim_EvalExpression (interp=interp@entry=0x85f070, exprObjPtr=<optimized out>, exprResultPtrPtr=exprResultPtrPtr@entry=0x7fffffffd1c8) at jim.c:9395
+#13 0x000000000051ab76 in Jim_GetBoolFromExpr (interp=interp@entry=0x85f070, exprObjPtr=<optimized out>, boolPtr=boolPtr@entry=0x7fffffffd20c) at jim.c:9437
+#14 0x000000000051e8d5 in Jim_IfCoreCommand (interp=0x85f070, argc=5, argv=0x7fffffffd2e0) at jim.c:12034
+#15 0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=5, objv=objv@entry=0x7fffffffd2e0) at jim.c:10184
+#16 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x8914a0) at jim.c:10640
+#17 0x000000000051e9bf in Jim_IfCoreCommand (interp=0x85f070, argc=5, argv=0x7fffffffd450) at jim.c:12046
+#18 0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=5, objv=objv@entry=0x7fffffffd450) at jim.c:10184
+#19 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x890b40) at jim.c:10640
+#20 0x000000000051ea13 in Jim_IfCoreCommand (interp=0x85f070, argc=5, argv=0x7fffffffd5c0) at jim.c:12057
+#21 0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=5, objv=objv@entry=0x7fffffffd5c0) at jim.c:10184
+#22 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x87eb70) at jim.c:10640
+#23 0x00000000005191bc in JimCallProcedure (interp=0x85f070, cmd=0x88f450, argc=2, argv=0x7fffffffd740) at jim.c:10878
+#24 0x0000000000519761 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=2, objv=objv@entry=0x7fffffffd740) at jim.c:10180
+#25 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x87bcd0) at jim.c:10640
+#26 0x000000000051df35 in Jim_EvalCoreCommand (interp=0x85f070, argc=<optimized out>, argv=<optimized out>) at jim.c:12914
+#27 0x0000000000519728 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=4, objv=objv@entry=0x7fffffffd860) at jim.c:10184
+#28 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=0x89c450) at jim.c:10640
+#29 0x00000000005191bc in JimCallProcedure (interp=0x85f070, cmd=0x8931a0, argc=1, argv=0x7fffffffd9e0) at jim.c:10878
+#30 0x0000000000519761 in JimInvokeCommand (interp=interp@entry=0x85f070, objc=objc@entry=1, objv=objv@entry=0x7fffffffd9e0) at jim.c:10180
+#31 0x000000000051a1ab in Jim_EvalObj (interp=interp@entry=0x85f070, scriptObjPtr=scriptObjPtr@entry=0x87ff90) at jim.c:10640
+#32 0x000000000051b33b in Jim_EvalSource (interp=interp@entry=0x85f070, filename=filename@entry=0x0, lineno=lineno@entry=0, script=script@entry=0x5461b0 "init") at jim.c:10955
+#33 0x0000000000442cbf in command_run_line (context=context@entry=0x85f030, line=line@entry=0x5461b0 "init") at command.c:656
+#34 0x0000000000405ac9 in openocd_thread (cmd_ctx=0x85f030, argv=0x7fffffffdce8, argc=<optimized out>) at openocd.c:294
+#35 openocd_main (argc=<optimized out>, argv=0x7fffffffdce8) at openocd.c:332
+#36 0x00000032e1621d65 in __libc_start_main () from /lib64/libc.so.6
+#37 0x00000000004054c5 in _start ()

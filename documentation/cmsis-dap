@@ -1,0 +1,55 @@
+OpenOCD: cmsis_dap_usb.c <- adi_v5_cmsis_dap.c <- ARM DAP ops
+See https://www.mail-archive.com/openocd-devel@lists.sourceforge.net/msg06071.html
+
+cmsis_dap_swd_read_reg()
+
+pyocd: cortex_m.py
+
+self.transport.readDP(DP_REG['IDCODE'])
+
+DP_REG = {'IDCODE' : 0x00,
+          'ABORT' : 0x00,
+          'CTRL_STAT': 0x04,
+          'SELECT': 0x08
+          }
+
+def readDP(self, addr):
+	resp = dapTransfer(self.interface, 1, [READ | DP_ACC | (addr & 0x0c)])
+	return  (resp[0] << 0)  | \
+		(resp[1] << 8)  | \
+		(resp[2] << 16) | \
+		(resp[3] << 24)
+
+def dapTransfer(interface, count, request, data = [0], dap_index = 0):
+    cmd = []
+    cmd.append(COMMAND_ID['DAP_TRANSFER'])
+    cmd.append(dap_index)
+    cmd.append(count)
+    count_write = count
+    for i in range(count):
+        cmd.append(request[i])
+        if not ( request[i] & ((1 << 1) | (1 << 4))):
+            cmd.append(data[i] & 0xff)
+            cmd.append((data[i] >> 8) & 0xff)
+            cmd.append((data[i] >> 16) & 0xff)
+            cmd.append((data[i] >> 24) & 0xff)
+            count_write -= 1
+    interface.write(cmd)
+    
+    resp = interface.read()
+    if resp[0] != COMMAND_ID['DAP_TRANSFER']:
+        raise ValueError('DAP_TRANSFER response error')
+    
+    if resp[1] != count:
+        raise ValueError('Transfer not completed')
+    
+    if resp[2] != 0x01:
+        raise ValueError('SWD Fault')
+        
+    return resp[3:3+count_write*4]
+
+== JTAG, SWD and other capabilities detection
+See OpenOCD cmssi_dap_get_caps_info()
+
+SWD/JTAG adapters that's always connected to a fixed target (built into eval boards): DAP_ID_DEVICE_VENDOR command
+	Grep for 'TARGET_DEVICE_FIXED' in the CMSIS-DAP source code

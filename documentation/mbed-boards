@@ -1,0 +1,52 @@
+pyocd uses mbed USB board IDs to differentiate different Cortex-M's
+
+pyocd: mebed_board.py
+
+TARGET_TYPE = {
+                "0200": "kl25z",
+                "0210": "kl05z",
+                "0220": "kl46z",
+                "0230": "k20d50m",
+                "0231": "k22f",
+                "0240": "k64f",
+                "0250": "kl02z",
+                "0260": "kl26z",
+                "1010": "lpc1768",
+                "9004": "lpc1768",
+                "1040": "lpc11u24",
+                "1050": "lpc800",
+                "1070": "nrf51822",
+              }
+
+
+@staticmethod
+def listConnectedBoards(transport = "cmsis_dap"):
+"""
+List the connected board info
+"""
+all_mbeds = INTERFACE[usb_backend].getAllConnectedInterface(mbed_vid, mbed_pid)
+index = 0
+if (all_mbeds != []) & (all_mbeds != None):
+    for mbed in all_mbeds:
+	mbed.write([0x80])
+	u_id_ = mbed.read()
+	try:
+	    target_type = array.array('B', [i for i in u_id_[2:6]]).tostring()
+	    if (target_type not in TARGET_TYPE):
+		logging.info("Unsupported target found: %s" % target_type)
+		continue
+	    else:
+		target_type = TARGET_TYPE[target_type]
+	    new_mbed = MbedBoard("target_" + target_type, "flash_" + target_type, mbed, transport)
+	    new_mbed.target_type = target_type
+	    new_mbed.unique_id = array.array('B', [i for i in u_id_[2:2+u_id_[1]]]).tostring()
+	    logging.info("new board id detected: %s", new_mbed.unique_id)
+	    print "%d => %s boardId => %s" % (index, new_mbed.getInfo().encode('ascii', 'ignore'), new_mbed.unique_id)
+	    mbed.close()
+	    index += 1
+	except Exception as e:
+	    print "received exception: %s" % e
+	    mbed.close()
+else:
+    print "No available boards is connected"
+

@@ -1,0 +1,16 @@
+# python
+*.pyc
+__pycache__
+
+# core dumps
+core.*
+
+# vim
+*.swp
+*.swo
+
+# gdb
+.gdb_history
+
+# source browsing
+tags

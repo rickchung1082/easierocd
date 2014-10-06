@@ -1,0 +1,3 @@
+texan/stlink uses the gdb kill command to reset the target:
+(gdb) kill
+(gdb) run

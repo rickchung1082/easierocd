@@ -1,0 +1,39 @@
+= OpenOCD Problems
+
+* cmsis_dap_get_version_info() just calls LOG_INFO() which is not usable by RPC
+* ARM Semihosting SYS_HEAPINFO has no malloc integration so always returns useless info
+* ARM Semihosting should finish implementing:
+        case 0x0d:      /* SYS_TMPNAM */
+        case 0x10:      /* SYS_CLOCK */
+        case 0x17:      /* angel_SWIreason_EnterSVC */
+        case 0x30:      /* SYS_ELAPSED */
+        case 0x31:      /* SYS_TICKFREQ */
+* ARM Semihosting should support adding custom syscalls (What's the safe private syscall number range?)
+
+== Multiple Adapter Support
+
+* For adapters with the same USB vendor and product IDs, OpenOCD can typically only drive the first one
+	See the way jtag_libusb_open() is used in stlink_usb.c and jlink.c
+	cmsis_dap_usb_open() in cmsis_dap_usb.c also just returns the first usable adapter
+	* OpenOCD does support multiple ST-Link's via specifying serial numbers
+		http://openocd.zylin.com/#/c/2198/
+		http://wunderkis.de/stlink-serialno/index.html
+	* OpenOCD cmsis-dap serial number filter (http://openocd.zylin.com/#/c/2275)
+* Must patch OpenOCD USB drivers to allow binding drivers by USB topology. Unique serial numbers may not exist for low cost adapters.
+* The right API design is probably like the Linux kernel where drivers declare patterns to match the devices they support and the kernel calls driver probe methods after doing the matching
+
+== RTOS Support
+* http://openocd.sourceforge.net/doc/html/GDB-and-OpenOCD.html#index-RTOS-Support-557
+Instead of 
+$_TARGETNAME configure -rtos auto
+detecting different symbols per OS (where is this implemented?). Have OS's implement an "OpenOCD OS support ABI"
+
+Question: where is this implemented? How well does it handle source debugging tasks like calling functions and reading variables?
+
+GDB Python scripting like solution where code runs on the developer machine instead of the device is also possible but
+the layering would be:
+	OpenOCD gdbserver (single core) <-> gdb running OS support Python code <-> some gdbserver in extended remote mode
+or
+	OpenOCD implementing a subset of the Python GDB ABI
+
+* Investigate OpenOCD RTX, Nuttx integration

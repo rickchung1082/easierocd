@@ -1,0 +1,2 @@
+# connect_assert_srst is the same as "connect under reset" in Keil uVision
+reset_config connect_assert_srst

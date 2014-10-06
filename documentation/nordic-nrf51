@@ -1,0 +1,6 @@
+nRF51_Series_Reference_Manual_v2.1.pdf
+
+NVM 
+6.2.7 CONFIGID (offset 0x5C)
+CONFIGID[31:16] FWID
+CONFIGID[15:0]  HWID

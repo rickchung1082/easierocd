@@ -1,0 +1,19 @@
+DPIDR (See https://silver.arm.com/download/ARM_and_AMBA_Architecture/AR551-DA-70001-r0p0-01rel0/IHI0031C_debug_interface_as.pdf, DPIDR, Debug Interface Identification Register):
+
+DPIDR[31:28] revision
+DPIDR[27:20] partno
+DPIDR[19:17] reserved
+DPIDR[16]:   mindp (not implemented: transaction counter, pushed-verify, pushed-find)
+DPIDR[15:12] version (1: DPv1, 2: DPv2)
+DPIDR[11:1]  designer id from JEDEC, (0x23b: ARM)
+DPIDR[0]     read-as-one
+
+
+
+Cortex-M0 r0p0 0x0BB11477
+Cortex-M0+ r0p0 0x0BC11477 (DP Architecture 1)
+                0x0BC12477 (DP Architecture 2)
+
+
+0x2ba01477 Cortex-M3 r2p0
+

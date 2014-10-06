@@ -1,0 +1,6 @@
+Target clock spped determines valid adapter speed range.
+Slowest possible clock determines the adapter speed used.
+OpenOCD config files mostly use the most conservative adapter speed even for single target CPU systems with multiple possible clocks, e.g. internal RC circuit.
+With knowledge of the target MCU, we can determine its current clock settings and adjust adapter speed accordingly instead of sticking to the conservative least common denominator speed.
+
+* Q: some OpenOCD config files seems to change the MCU clock using the board reset hook. Is this overridable? Does multiple OpenOCD hooks to the same event get executed in reverse order?
