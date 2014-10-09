@@ -1,0 +1,28 @@
+= OpenOCD Strong Points a.k.a. Why Continue Using OpenOCD
+
+* Established community focal point for new MCU, memory and debug adapter support
+	* flash algorithms (Really, programs that run on the MCU that can be used for flashing)
+	* MCU "reset-init" handlers
+		* clock setup scripts
+		* miscallaneous hardware set, e.g. interrupt vector relocation, don't boot to isp mode etc
+	* debug adapter support
+  Any replacement or fork will need continued maintanance as new hardware comes out.
+
+* Some good developers are involved in OpenOCD, e.g. search for OpenOCD in https://plus.google.com/+AndreyYurovsky/posts
+* Track record of OpenOCD developers getting vendor documentation under NDA (e.g. ST-Link)
+
+= OpenOCD Annoyances
+
+* TCL source for targets, boards "sources" whole files for code reuse
+	=> You can't call CHIP.reset-init without the other code in TARGET.cfg running
+	A sane design would be exposing a "Target" interface with "config", "reset_start", "reset_init" etc methods
+  Possible solution: collect useful static analysis with herustics by hacking Jim TCL interpreter
+	collect reset-init handlers per known MCU family
+
+* TCL RPC is "very lightly documented" and doesn't support event notification (e.g. USB debug adapter disconnect)
+
+* Why OpenOCD is so Hard to Use
+
+Initial hardware config only works when you specify every choice correctly in an unfamiliar programming language calling procedures that may change between OpenOCD versions.
+For software development, the smart way to use OpenOCD, to have one daemon per adapter running in the background as needed, is not the obvious way to do flash programming.
+When looking for new chip support, config files or patches found on the Internet often only work with a specific OpenOCD version. It's hard to tell the required OpenOCD  version to get a specific hardware to work.

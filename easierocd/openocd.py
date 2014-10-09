@@ -20,6 +20,9 @@ class OpenOcdError(Exception):
 
     __repr__ = __str__
 
+class TargetMemoryAccessError(OpenOcdError):
+    pass
+
 class OpenOcdValueError(ValueError, OpenOcdError):
     def __init__(self, *args):
         super(ValueError, self).__init__(*args)
@@ -36,15 +39,17 @@ class OpenOcdRpc(object):
     def __init__(self, host='127.0.0.1', port=6666, pid=None):
         logging.debug('OpenOcdRrc connect: host: %s, port: %d' % (host, port))
         (self.host, self.port) = (host, port)
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.conn.connect((host, port))
         self.msg_iter = None
         self.pid = pid
+        self.ocd_transport = None # 'jtag', 'swd', 'hla_swd' etc
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn.connect((host, port))
 
     def send_msg(self, cmd):
-        s = cmd.encode('ascii') + self.SEPARATOR
-        logging.debug('OpenOcdRpc <- ' + repr(s))
-        self.conn.sendall(s)
+        if isinstance(cmd, str):
+            cmd = cmd.encode('ascii')
+        logging.debug('OpenOcdRpc <- ' + repr(cmd))
+        self.conn.sendall(cmd + self.SEPARATOR)
 
     def _gen_msg(self):
         out = []
@@ -89,16 +94,22 @@ class OpenOcdRpc(object):
         return self.recv_msg()
 
     def idcode(self):
-        r = self.calll('ocd_idcode')
-        return None
+        if self.ocd_transport is None:
+            self.ocd_transport = self.get_transport()
+        if self.ocd_transport.startswith('hla_'):
+            r = self.call('capture hla_idcode')
+        else:
+            r = self.call('capture dap_idcode')
+        return int(r, base=16)
 
     def read_word(self, addr):
         r = self.call('ocd_mdw 0x%x' % (addr,))
-        # response: '0xe0042000: 10036419 \n'
+        # response: b'0xe0042000: 10036419 \n'
+        # response: b''
         try:
-            return int(r.split(': ')[1], base=16)
+            return int(r.split(b': ')[1], base=16)
         except IndexError:
-            raise OpenOcdError(cmd='ocd_mdw', response=r)
+            raise TargetMemoryAccessError(cmd='ocd_mdw', response=r)
 
     def read_mem_into(self, addr, bytearray_out):
         with tempfile.NamedTemporaryFile(mode='rb') as tf:
@@ -147,42 +158,89 @@ class OpenOcdRpc(object):
             if ('downloaded ' not in r) or (' bytes in ' not in r):
                 raise OpenOcdError(cmd='ocd_load_image', response=r)
 
+    def shutdown(self):
+        r = self.call('ocd_shutdown')
+        if r.strip() != b'shutdown command invoked':
+            raise OpenOcdError(cmd='ocd_shutdown', response=r)
+
+    def declare_flash_bank(self):
+        assert(0)
+        self.call('ocd_flash_bank')
+
+    def tcl_port(self):
+        # same info should be available in 'self.port' but you never know
+        r = self.call('ocd_tcl_port')
+        return int(r)
+
+    def gdb_port(self):
+        r = self.call('ocd_gdb_port')
+        return int(r)
+
+    def telnet_port(self):
+        r = self.call('ocd_telnet_port')
+        return int(r)
+
+    def get_transport(self):
+        '-> "hla_swd", "swd", "jtag" etc'
+        r = self.call('ocd_transport select')
+        return r.decode('ascii')
+
+    def initialized(self):
+        '-> bool'
+        r = self.call('initialized')
+        return bool(int(r))
+
+    def target_names(self):
+        ' -> [ NAME...]'
+        r = self.call('ocd_target names')
+        return [ x.decode('ascii') for x in r.split() if x ]
+
     def f():
             import IPython; IPython.embed()
             
 
 def test():
     logging.basicConfig(level=logging.DEBUG)
-    s = OpenOcdRpc()
-    STM32_DBGMCU_IDCODE = 0xe0042000
+    o = OpenOcdRpc(port=6666)
 
-    b = bytearray(1*4)
-    try:
-        s.read_mem_into(0x100000000, b)
-    except ValueError:
-        pass
-    else:
-        assert(0)
+    if 1:
+        o.target_names()
 
-    s.read_mem_into(STM32_DBGMCU_IDCODE, b)
-    idcode = (ctypes.c_int32*1).from_buffer(b)[0]
-    print('idcode: 0x%x' % (idcode,))
+    if 0:
+        print(o.get_transport())
+        print(o.tcl_port(), o.gdb_port(), o.telnet_port())
+        print('0x%x' % (o.idcode(),))
 
-    b = s.read_mem(STM32_DBGMCU_IDCODE, 4)
-    idcode1 = (ctypes.c_int32*1).from_buffer(b)[0]
-    assert(idcode == idcode1)
+    if 0:
+        STM32_DBGMCU_IDCODE = 0xe0042000
 
-    try:
-        s.write_mem(0x100000000, bytearray([0x55]))
-    except ValueError:
-        pass
-    else:
-        assert(0)
-    
-    # STM32F429, RAM: origin: 0x2000_0000, length: 192K
-    pattern = [0x55, 0xaa]
-    b = bytearray(pattern * (192 * 1024 // len(pattern)))
-    s.write_mem(0x2000*0x10000, b)
+        b = bytearray(1*4)
+        try:
+            o.read_mem_into(0x100000000, b)
+        except ValueError:
+            pass
+        else:
+            assert(0)
+
+        o.read_mem_into(STM32_DBGMCU_IDCODE, b)
+        stm32_idcode = (ctypes.c_int32*1).from_buffer(b)[0]
+        print('sTM32 idcode: 0x%x' % (stm32_idcode,))
+
+        b = o.read_mem(STM32_DBGMCU_IDCODE, 4)
+        stm32_idcode1 = (ctypes.c_int32*1).from_buffer(b)[0]
+        assert(stm32_idcode == stm32_idcode1)
+
+        try:
+            o.write_mem(0x100000000, bytearray([0x55]))
+        except ValueError:
+            pass
+        else:
+            assert(0)
+        
+        # STM32F429, RAM: origin: 0x2000_0000, length: 192K
+        pattern = [0x55, 0xaa]
+        b = bytearray(pattern * (192 * 1024 // len(pattern)))
+        o.write_mem(0x2000*0x10000, b)
 
 if __name__ == '__main__':
     test()

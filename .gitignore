@@ -14,3 +14,6 @@ core.*
 
 # source browsing
 tags
+
+# "make check" invokes nose in a strange way
+_xxx_tmp.py

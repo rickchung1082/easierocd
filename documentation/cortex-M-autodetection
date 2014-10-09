@@ -14,8 +14,8 @@ gdb "load" further needs a working flash algorithm.
 
 * Debug adapter USB IDs (DONE)
 * Cortex-M DAP idcode (in progress)
-	hla idcode (HACK DONE, hla_interface.c jim_idcode)
-	dap idcode (OpenOCD arm_adi_v5.c)
+	hla_idcode (HACK DONE, hla_interface.c jim_idcode)
+	dap_idcode (OpenOCD arm_adi_v5.c)
 
 * Differentiate Cortex-M Silicon Vendors (How?)
 ** ROM table? "Not much help"
@@ -48,6 +48,10 @@ Connect under reset so that the MCU is in a known state:
 
 	* Atmel?
 
+== Connect Assert SRST (Connect Under Reset)
+# connect_assert_srst is the same as "connect under reset" in Keil uVision
+reset_config connect_assert_srst
+
 * Connect while asserting reset by default
 Or connect immediately after reset for LPC 8xx (tweak adapter_nrst_delay)
 Add a separate "attach" command that doesn't reset the target
@@ -55,3 +59,5 @@ Add a separate "attach" command that doesn't reset the target
 Connecting under reset makes the debug environment more predictable:
 ** Reset SWD / JTAG GPIO pins to debug state
 ** Reset interrupt vector location
+
+Handle both srst_nogate and LPC11xx srst_gate targets

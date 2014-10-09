@@ -1,0 +1,14 @@
+/home/scottt/work/openocd/openocd/tcl/target/stm32f0x.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32f1x.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32f2x.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32f3x.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32f4x.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32l.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32lx_dual_bank.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32w108xx.cfg
+/home/scottt/work/openocd/openocd/tcl/target/stm32xl.cfg
+
+# grep proc $(cat documentation/openocd-stm32-target-files)
+# /home/scottt/work/openocd/openocd/tcl/target/stm32l.cfg:proc stm32l_enable_HSI {} {
+# Of the STM32 target files, only stm32l.cfg starts with a lower JTAG speed then
+# increases the JTAG speed in reset-init after calling stm32l_enable_HSI

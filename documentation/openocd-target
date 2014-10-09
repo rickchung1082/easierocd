@@ -1,0 +1,4 @@
+See: documentation/openocd-target-cortex_m-hla.diff
+OpenOCD's 'cortex_m' command doesn't work
+http://openocd.sourceforge.net/doc/html/Architecture-and-Core-Commands.html#softwaredebugmessagesandtracing
+"maskisr", "vector_catch", "reset_config" etc doesn't work on "high level" transports like stlink and (new) ti-icdi

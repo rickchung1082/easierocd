@@ -1,0 +1,19 @@
+http://openocd.sourceforge.net/doc/html/Config-File-Guidelines.html#Config-File-Guidelines
+
+== Reset
+* LPC chips may need "reset-deassert-post" handlers
+
+"Some chips need special attention during reset handling if they're going to be used with JTAG. An example might be needing to send some commands right after the target's TAP has been reset, providing a reset-deassert-post event handler that writes a chip register to report that JTAG debugging is being done. Another would be reconfiguring the watchdog so that it stops counting while the core is halted in the debugger."
+
+== Cortex-M ETM and ETB Tracing
+OpenOCD ETM, ETB support
+etm config $_TARGETNAME 16 normal full etb
+etm config $_TARGETNAME $_CHIPNAME.etb
+
+== Cortex-M Vector Catch
+* Report interrupt hits somehow?
+
+== FIXME: Wait For Interrupt Disables DAP Access
+* Handle this consistently
+* STM32 DBGMCU: enable DAP access
+** Provide warning for power consumption measurements? => Prioritize productivity, let the advanced users learn the internals.

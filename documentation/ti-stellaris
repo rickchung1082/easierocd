@@ -1,0 +1,19 @@
+* target/stellaris.cfg
+	proc reset_peripherals {family}
+	reset_peripherals is only useful for Cortex-M core that don't support sysresetreq
+
+* src/flash/nor/stellaris.c
+	flash bank $_CHIPNAME.flash stellaris 0 0 0 0 $_TARGETNAME
+
+* Boards
+	board/ek-lm3s1968.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s3748.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s6965.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s811.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s811-revb.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s8962.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s9b9x.cfg:source [find target/stellaris.cfg]
+	board/ek-lm3s9d92.cfg:source [find target/stellaris.cfg]
+	board/ek-lm4f120xl.cfg:source [find target/stellaris.cfg]
+	board/ek-lm4f232.cfg:source [find target/stellaris.cfg]
+	board/ek-tm4c123gxl.cfg:source [find target/stellaris.cfg]

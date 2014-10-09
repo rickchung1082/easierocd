@@ -34,3 +34,27 @@ This field indicates the device ID.
 1. Cat.3 devices: STM32L15xxC or STM3216xxC devices with RPN ending with letter 'A', in WLCSP64 packages or with more then 100 pin.
 
 texan/stlink: stlink-common.h
+
+* target/stm32l.cfg: adapter_khz 300; stm32_enable_HSI; adapter_khz 2000
+	proc stm32l_enable_HSI {} {
+		# Enable HSI as clock source
+		echo "STM32L: Enabling HSI"
+
+		# Set HSION in RCC_CR
+		mww 0x40023800 0x00000101
+
+		# Set HSI as SYSCLK
+		mww 0x40023808 0x00000001
+
+		# Increase JTAG speed
+		adapter_khz 2000
+	}
+
+	$_TARGETNAME configure -event reset-init {
+		stm32l_enable_HSI
+	}
+
+	$_TARGETNAME configure -event reset-start {
+		adapter_khz 300
+	}
+

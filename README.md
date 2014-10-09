@@ -2,12 +2,6 @@
 
 Goal: make using popular hardware debuggers easy and support ARM Cortex-M microcontrollers well.
 
-= Why OpenOCD is so Hard to Use
-
-Initial hardware setup only works when you specify every choice correctly in an unfamiliar programming language that matches the OpenOCD version.
-For software development, the smart way to use OpenOCD, to have one daemon per adapter running in the background as needed, is not the obvious way to use it.
-When looking for new chip support, config files found on the Internet often only work with a specific OpenOCD version. It's hard to tell the required software version to get a specific hardware to work.
-
 == Initial Hardware Setup
 
 * No hardware adapter detection even though most are USB
@@ -44,18 +38,3 @@ The easiest way to write to flash memory is by using the 'openocd' command but i
 
 * You really want a device database annotated with user sucess or failture stories and the software version required
 * Must google for success storis for whether flash writing or debugging works
-
-
-= OpenOCD Strong Points
-
-It's an established community focal point.
-
-* For debug adapter support, members sometimes has access to documentation under NDA (e.g. ST-Link USB protocol)
-	* OpenOCD community members have relationship with chip vendors like TI and ST.
-
-* Collects per chip knowledge like flash algorithms, clock setup, boot mode (ISP etc), interrupt vector relocation etc
-	Initial chips setup are typically expressed as TCL commmands that are launched by the OpenOCD reset hook
-	"Flash algorithms" here are really programs that run on the target CPU that knows how to erase, read and write flash memory
-
-= Other Topics
-

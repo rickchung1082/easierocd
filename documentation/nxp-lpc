@@ -1,0 +1,66 @@
+target/lpc1xxx.cfg: (lpc1114.cfg lpc11xx.cfg lpc12xx.cfg lpc13xx.cfg lpc17xx.cfg)
+
+1. _CCLK: table of initial RC circuit clock frequencies
+	_CCLK passed to flash algorithm:
+		flash bank $_FLASHNAME lpc2000 0x0 0 0 0 $_TARGETNAME auto $_CCLK calc_checksum
+		==> should be able to auto detect _CCLK through RAM code
+
+2. reset-init: interrupt vector relocation
+
+if { $_CHIPSERIES == "lpc1100" || $_CHIPSERIES == "lpc1200" || $_CHIPSERIES == "lpc1300" } {
+	# Do not remap 0x0000-0x0200 to anything but the flash (i.e. select
+	# "User Flash Mode" where interrupt vectors are _not_ remapped,
+	# and reside in flash instead).
+	#
+	# Table 8. System memory remap register (SYSMEMREMAP, address 0x4004 8000) bit description
+	# Bit Symbol Value Description
+	# 1:0 MAP          System memory remap
+	#            0x0   Boot Loader Mode. Interrupt vectors are re-mapped to Boot ROM.
+	#            0x1   User RAM Mode. Interrupt vectors are re-mapped to Static RAM.
+	#            0x2   User Flash Mode. Interrupt vectors are not re-mapped and reside in Flash.
+	# 31:2 -     -     Reserved.
+	$_TARGETNAME configure -event reset-init {
+		mww 0x40048000 0x02
+	}
+} elseif { $_CHIPSERIES == "lpc1700" } {
+	# Do not remap 0x0000-0x0020 to anything but the flash (i.e. select
+	# "User Flash Mode" where interrupt vectors are _not_ remapped,
+	# and reside in flash instead).
+	#
+	# See Table 612. Memory Mapping Control register (MEMMAP - 0x400F C040) bit description
+	# Bit Symbol Value Description Reset
+	# value
+	# 0 MAP Memory map control. 0
+	# 0 Boot mode. A portion of the Boot ROM is mapped to address 0.
+	# 1 User mode. The on-chip Flash memory is mapped to address 0.
+	# 31:1 - Reserved. The value read from a reserved bit is not defined. NA
+	#
+	# http://ics.nxp.com/support/documents/microcontrollers/?scope=LPC1768&type=user
+	$_TARGETNAME configure -event reset-init {
+		mww 0x400FC040 0x01
+	}
+}
+
+Multi Core:
+target/lpc4350.cfg:
+	JTAG support for both Cortex-M4 and M0 cores
+	SWD support for Cortex-M4 core
+
+	No flash bank config though?
+
+
+Ignore:
+target/lpc2xxx.cfg: arm7tdmi cores, ignore
+	proc setup_lpc2xxx {chip_name cputapids flash_size flash_variant workarea_size core_freq_khz adapter_freq_khz}
+
+	target/lpc2103.cfg:	setup_lpc2xxx lpc2103 0x4f1f0f0f 0x8000 lpc2000_v2 0x2000 $core_freq_khz $adapter_freq_khz
+	target/lpc2148.cfg:	setup_lpc2xxx lpc2148 "0x3f0f0f0f 0x4f1f0f0f" 0x7d000 lpc2000_v2 0x8000 $core_freq_khz $adapter_freq_khz
+	target/lpc2478.cfg:	setup_lpc2xxx lpc2478 0x4f1f0f0f 0x7e000 lpc2000_v2 0x10000 $core_freq_khz $adapter_freq_khz
+	target/lpc2129.cfg:	setup_lpc2xxx lpc2129 0xcf1f0f0f 0x40000 lpc2000_v1 0x4000 $core_freq_khz $adapter_freq_khz
+	target/lpc2124.cfg:	setup_lpc2xxx lpc2124 0x4f1f0f0f 0x40000 lpc2000_v1 0x4000 $core_freq_khz $adapter_freq_khz
+	target/lpc2294.cfg:	setup_lpc2xxx lpc2294 0xffffffff 0x40000 lpc2000_v1 0x4000 $core_freq_khz $adapter_freq_khz
+	target/lpc2460.cfg:	setup_lpc2xxx lpc2460 0x4f1f0f0f 0 lpc2000_v2 0x10000 $core_freq_khz $adapter_freq_khz
+	target/lpc2378.cfg:	setup_lpc2xxx lpc2378 0x4f1f0f0f 0x7e000 lpc2000_v2 0x8000 $core_freq_khz $adapter_freq_khz
+
+target/{lpc3131,lpc3250}.cfg: arm926ejs cores, ignore
+target/lpc2900.cfg: arm966e core, ignore

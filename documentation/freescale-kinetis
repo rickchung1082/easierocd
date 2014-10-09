@@ -1,0 +1,9 @@
+* src/flash/nor/kinetis.c
+*
+
+= Targets
+* kinetis flash algo autodetect
+	target/kl25.cfg:flash bank $_FLASHNAME kinetis 0 0 0 0 $_TARGETNAME
+	target/kl46.cfg:flash bank $_FLASHNAME kinetis 0 0 0 0 $_TARGETNAME
+
+* {k40,k60}.cfg: No flash bank config, cortex-m cores

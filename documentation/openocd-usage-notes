@@ -1,2 +1,32 @@
+== Connect Assert SRST (Connect Under Reset)
 # connect_assert_srst is the same as "connect under reset" in Keil uVision
 reset_config connect_assert_srst
+
+== OpenOCD: Writing Config Files
+http://openocd.sourceforge.net/doc/html/Config-File-Guidelines.html#fnd-1
+
+During board bringup, write "reset-init" handler (PLL, oscillator, external RAM and FLASH) last, after verifying everything else. 
+
+== OpenOCD: Config Stage and Run Stage ("init")
+http://openocd.sourceforge.net/doc/html/Daemon-Configuration.html#configurationstage
+"Those configuration commands include declaration of TAPs, flash banks, the interface used for JTAG communication, and other basic setup. The server must leave the configuration stage before it may access or activate TAPs. After it leaves this stage, configuration commands may no longer be issued."
+
+* Proabaly created to simplify "which commands can't be used before which other commands" dependency management.
+* Design mistake that kills autodetection, since many hard coded "Config Stage" settings could have been autodetected with information available in "Run Stage". e.g. board detection through I2C EEPROM
+* "init_board", "init_target" handlers that run in "Run Stage" fixes some of this.
+* Kills TI icepick style dynamic JTAG chain configuration as well
+
+* easierocd workaround: init_for_detection, shutdown, relaunch, then init_for_cotex_m
+
+== OpenOCD Flash Usage
+openocd -f CONFIG
+	-c reset
+	-c flash info <bank>
+
+openocd -f CONFIG
+	-c reset
+	-c flash erase_address <start> <len>
+
+openocd -f CONFIG
+	-c reset init
+	-c load_image

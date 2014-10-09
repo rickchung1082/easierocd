@@ -13,6 +13,12 @@ import usb.util
 
 from easierocd.debugadapters import DEBUG_ADAPTERS
 
+class UnsupportedAdapter(Exception):
+    pass
+
+def adapter_by_usb_id(usb_id):
+    assert(0)
+
 def connected_debug_adapters():
     out = []
     for d in usb.core.find(find_all=True):

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+#!/usr/bin/env python3 
 import sys
 import os
 import errno
@@ -13,10 +12,15 @@ import signal
 import logging
 
 import easierocd.usb
+from easierocd.usb import UnsupportedAdapter
 import easierocd.openocd
+from easierocd.openocd import (OpenOcdError)
 import easierocd.arm
-from easierocd.arm import (ArmCpuDetection, ArmCpuDetectionError,
-                           AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter)
+from easierocd.util import (Bag, HexDict, waitpid_ignore_echild, kill_ignore_echild)
+from easierocd.openocdcortexm import (OpenOcdCortexMDetect,
+                           OpenOcdCortexMDetectError,
+                           AdapterDoesntSupportTransport,
+                           OpenOcdDoesntSupportTransportForAdapter)
 
 class EasierOcdError(Exception):
     pass
@@ -27,8 +31,6 @@ def main_function(func):
     global main_function_map
     main_function_map[func.__name__.replace('_','-')] = func
     return func
-
-# OpenOCD control: one process per debug adapter
 
 def path_safe_str(s):
     '''
@@ -75,11 +77,13 @@ def tmux_pane_get_pty(tmux_target):
     # strip '\n' at end
     return (''.join(out))[:-1]
 
+# OpenOCD control: one process per debug adapter
+
 def openocd_start(adapter):
     '-> (pid, tcl_port)'
     (info, device) = adapter
+    logging.debug('openocd_start: USB 0x%04x:0x%04x' % (device.idVendor, device.idProduct))
     sname = tmux_session_name_for_adapter(adapter)
-    tcl_port = 6666
 
     tmux_stderr = tempfile.TemporaryFile(mode='w+')
     # The pause helper is just a program for tmux to wait on that doesn't touch STDIN/STDOUT/STDERR
@@ -102,18 +106,26 @@ def openocd_start(adapter):
 
     tmux_pty_fd = os.open(tmux_pane_get_pty(sname), os.O_RDWR)
 
+    (gdb_port, telnet_port, tcl_port) = (3333, 4444, 6666)
     while 1:
-        openocd_cmd = ['openocd', '-c', 'tcl_port %d' % (tcl_port,), '-c', 'noinit']
+        openocd_cmd = ['openocd', 
+                       '-l', '/tmp/easierocd-openocd.log',
+                       '-c', 'tcl_port %d' % (tcl_port,),
+                       '-c', 'gdb_port %d' % (gdb_port,),
+                       '-c', 'telnet_port %d' % (telnet_port,),
+                       '-c', 'noinit']
         openocd_stderr = tempfile.TemporaryFile(mode='w+')
         openocd_process = subprocess.Popen(openocd_cmd, stderr=openocd_stderr, stdin=tmux_pty_fd, stdout=tmux_pty_fd)
         time.sleep(0.001)
         r = openocd_process.poll()
         if r is None:
             break
+        # TODO: make OpenOCD support local sockets and Windows Named Pipes
         tcl_port = random.randrange(1025, 65535)
+        (gdb_port, telnet_port) = (tcl_port + 1, tcl_port + 2)
     return (openocd_process.pid, tcl_port)
 
-def _get_openocd_rpc_write_pid(fd, adapter):
+def _start_openocd_rpc_write_pid(fd, adapter):
     (pid, tcl_port) = openocd_start(adapter)
     ctrl_data = dict(openocd_pid=pid, tcl_port=tcl_port)
     os.write(fd, json.dumps(ctrl_data).encode('ascii'))
@@ -132,12 +144,16 @@ def _get_openocd_rpc_write_pid(fd, adapter):
             time.sleep(0.01)
         else:
             break
-    if i == n_tries:
+    if o is None:
         raise conn_refused
-    assert(o)
     return o
 
+(OPENOCD_ALREADY_STARTED,
+ OPENOCD_NEWLY_STARTED) = range(2)
+
 def openocd_rpc_for_adapter(adapter):
+    '-> (openodc_rpc, openocd_already_started_or_not)'
+
     def _pid_file_exists():
         # check if daemon is running, if not, cleanup
         # TODO: wrap other os.open failtures (e.g. PERM) in custom exception
@@ -148,21 +164,21 @@ def openocd_rpc_for_adapter(adapter):
         try:
             ctrl_data = json.loads(data.decode('ascii'))
         except ValueError:
-            # TODO: wrap os.unlink failtures (e.g. PERM) in custom exception
+            # TODO: wrap os.unlink failtures (e.g. EPERM) in custom exception
             os.unlink(pid_fname)
             fd = os.open(pid_fname, os.O_EXCL|os.O_CREAT|os.O_RDWR)
-            return _get_openocd_rpc_write_pid(fd, adapter)
+            return (_start_openocd_rpc_write_pid(fd, adapter), OPENOCD_NEWLY_STARTED)
         else:
             (pid, tcl_port) = (ctrl_data['openocd_pid'], ctrl_data['tcl_port'])
             try:
                 orpc = easierocd.openocd.OpenOcdRpc(port=tcl_port, pid=pid)
-            except ConnectionRefusedError:
+            except (ConnectionRefusedError, ConnectionResetError):
                 # FIXME: check if process with 'pid' is openocd, if true, kill
                 os.unlink(pid_fname)
                 fd = os.open(pid_fname, os.O_EXCL|os.O_CREAT|os.O_RDWR)
-                return _get_openocd_rpc_write_pid(fd, adapter)
+                return (_start_openocd_rpc_write_pid(fd, adapter), OPENOCD_NEWLY_STARTED)
             else:
-                return orpc
+                return (orpc, OPENOCD_ALREADY_STARTED)
 
     (info, device) = adapter
     # TODO: patch OpenOCD to use local sockets and
@@ -173,7 +189,7 @@ def openocd_rpc_for_adapter(adapter):
     except FileExistsError:
         return _pid_file_exists()
     else:
-        return _get_openocd_rpc_write_pid(fd, adapter)
+        return (_start_openocd_rpc_write_pid(fd, adapter), OPENOCD_NEWLY_STARTED)
 
 def interactive_choose_adapter(adapters):
     # Check last choice in $HOME/.easierocd-last.ini
@@ -188,106 +204,193 @@ def easierocd_setup(args):
     '''
     pass
 
+def openocd_setup(options):
+    '-> (adapter, dap_info, mcu_info, openocd_rpc)'
+
+    if options.adapter_usb_id is not None:
+        try:
+            adapter = easierocd.usb.adapter_by_usb_id(options.adapter_usb_id)
+        except UnsupportedAdapter:
+            sys.stderr.write('%s: specified adapter is not supported\n' % (program_name(),))
+            sys.exit(3)
+    else:
+        adapters = easierocd.usb.connected_debug_adapters()
+        if not adapters:
+            sys.stderr.write('%s: no supported debug adapters found\n' % (program_name(),))
+            sys.exit(3)
+
+        if len(adapters) == 1:
+            adapter = adapters[0]
+        else:
+            adapter = interactive_choose_adapters(adapters)
+
+    (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+    openocd_initialized = o.initialized()
+    target_names = o.target_names()
+
+    logging.debug('target_name: %r' % (target_names,))
+    if openocd_initialized and len(target_names) >= 1  and target_names[0] != 'EASIEROCD_DETECT.cpu':
+        mdetect = OpenOcdCortexMDetect(options, adapter, o)
+        dap_info = mdetect.detect_dap()
+        mcu_info = mdetect.detect_mcu(dap_info)
+    else:
+        if openocd_newly_started_or_not == OPENOCD_ALREADY_STARTED:
+            o.shutdown()
+            waitpid_ignore_echild(o.pid)
+            (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+        
+        # hard coding assumption that ARM Cortex-M is debug target
+        mdetect = OpenOcdCortexMDetect(options, adapter, o)
+
+        # Try SWD first (read IDCODE), if that fails falllback to JTAG
+        # Use adapter_info and querying the adapters (e.g. cmsis-dap INFO_ID_CAPS command)
+        # to know whether the adapter supports SWD/JTAG
+        openocd_transport = 'swd'
+        try:
+            mdetect.openocd_init_for_detection(openocd_transport)
+        except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
+            try_jtag = True
+        except ConnectionError:
+            # protocol or connection error
+            assert(o.pid is not None)
+            kill_ignore_echild(o.pid, signal.SIGTERM)
+            time.sleep(0.01)
+            (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+            mdetect = OpenOcdCortexMDetect(options, adapter, o)
+            mdetect.openocd_init_for_detection(openocd_transport)
+
+        # OpenOCD limits 'flash bank' to config stage
+        # So declare_flash_bank is called afer openocd_init_for_detection before openocd_init_for_cortex_m
+        dap_info = None
+        try:
+            dap_info = mdetect.detect_dap()
+        except OpenOcdCortexMDetectError as e:
+            #FIXME: if the target voltage is too low, we should give up here
+            try_jtag = True
+        else:
+            try_jtag = False
+
+        if try_jtag:
+            openocd_transport = 'jtag'
+            try:
+                mdetect.openocd_init_for_detection(openocd_transport)
+            except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
+                dap_info = None
+            else:
+                # protocol or connection error
+                assert(o.pid is not None)
+                kill_ignore_echild(o.pid, signal.SIGTERM)
+                # FIXME: connect
+                mdetect.openocd_init_for_detection(openocd_transport)
+                try:
+                    dap_info = mdetect.detect_dap()
+                except OpenOcdCortexMDetectError as e:
+                    dap_info = None
+
+        if dap_info is None:
+            stderr.write('%s: failed to detect ARM Debug Access Port, aborting\n' % (program_name(),))
+            sys.exit(3)
+
+        logging.info('dap_info: %r' % (HexDict(dap_info),))
+
+        # mcu_info: silicon vendor, MCU family, make, revision etc
+        try:
+            mcu_info = mdetect.detect_mcu(dap_info)
+        except OpenOcdCortexMDetectError:
+            o.shutdown()
+            waitpid_ignore_echild(o.pid)
+            raise
+
+        logging.info('mcu_info: %r' % (HexDict(mcu_info),))
+
+        # Don't attempt to 'init' OpenOCD twice, shutdown then re-launch instead
+        o.shutdown()
+        waitpid_ignore_echild(o.pid)
+
+        (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+        mdetect = OpenOcdCortexMDetect(options, adapter, o)
+        mdetect.openocd_init_for_cortex_m(openocd_transport, dap_info, mcu_info)
+        # OpenOCD gdbserver is up after 'init'
+
+    return (adapter, dap_info, mcu_info, o)
+
 @main_function
 def easierocd_gdb(args):
     '# Start gdb session already connected to the debug adapter'
     logging.basicConfig(level=logging.DEBUG)
 
     def print_usage_exit():
-        sys.stderr.write('easierocd-gdb [OPTIONS] GDB_OPTIONS...\n'
+        sys.stderr.write('easierocd-gdb [OPTIONS] GDB_ARUGMENTS...\n'
                          'OPTIONS:\n'
                          '\t--easierocd-gdb-file ELF\n'
-                         '\t--adapter USB_BUS:USB_ADDR\n'
+                         '\t--easierocd-adapter USB_BUS:USB_ADDR\n'
+                         'option names are prefixed to avoid clashes with GDB\n'
                          'Environemnt Variables\n'
                          '\tGDB: use "$GDB" as the gdb executable\n'
                          '\tHOST: use "$HOST-gdb" as the GDB executable\n'
                          )
         sys.exit(2)
 
-    for a in args:
+    options = Bag()
+    options.gdb_file = None
+    options.adapter_usb_id = None
+
+    (i, gdb_args) = (0, [])
+    while i < len(args):
+        a = args[i]
         if a in set(['-h', '--help']):
             print_usage_exit()
-
-    adapters = easierocd.usb.connected_debug_adapters()
-    if not adapters:
-        sys.stderr.write('%s: no supported debug adapters found\n' % (program_name(),))
-        sys.exit(3)
-
-    if len(adapters) == 1:
-        adapter = adapters[0]
-    else:
-        adapter = interactive_choose_adapters(adapters)
-
-    o = openocd_rpc_for_adapter(adapter)
-    # hard coding ARM CPU as debug target
-    mdetect = ArmCpuDetection(adapter, o)
-
-    # Try SWD first (read IDCODE), if that fails falllback to JTAG
-    # Use adapter_info and querying the adapters (e.g. cmsis-dap INFO_ID_CAPS command)
-    # to know whether the adapter supports SWD/JTAG
-    try:
-        mdetect.openocd_init_for_detection('swd')
-    except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
-        try_jtag = True
-    except ConnectionError:
-        # protocol or connection error
-        assert(o.pid is not None)
-        os.kill(o.pid, signal.SIGTERM)
-        time.sleep(0.01)
-        o = openocd_rpc_for_adapter(adapter)
-        mdetect = ArmCpuDetection(adapter, o)
-        mdetect.openocd_init_for_detection('swd')
-
-    # TODO: OpenOCD limits 'flash bank' to init phase
-    # this design kills autodetection
-    try:
-        cpu_variant = mdetect.detect_dap()
-    except ArmCpuDetectionError as e:
-        #FIXME:
-        try_jtag = True
-    else:
-        try_jtag = False
-
-    if try_jtag:
-        try:
-            mdetect.openocd_init_for_detection('jtag')
-        except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
-            sys.stderr.write("%s: can't reach debug access port through either SWD and JTAG. abortign\n" % (program_name(),))
-            sys.exit(3)
+        elif a == '--easierocd-gdb-file':
+            try:
+                options.gdb_file = a[i+1]
+            except IndexError:
+                sys.stderr.write('%s: --easierocd-gdb-file requires an argument\n' % (program_name(),))
+            i += 1
+        elif a == '--easierocd-adapter':
+            try:
+                options.adapter_usb_id = a[i+1]
+            except IndexError:
+                sys.stderr.write('%s: --easierocd-adapter requires an argument\n' % (program_name(),))
         else:
-            # protocol or connection error
-            assert(o.pid is not None)
-            os.kill(o.pid, signal.SIGTERM)
-            mdetect.openocd_init_for_detection('jtag')
-
-    mcu_info = mdetect.detect_mcu()
-    # shutdown then relaunch OpenOCD
-    o.shutdown()
-    o = openocd_rpc_for_adapter(adapter)
-    mdetect = ArmCpuDetection(adapter, o)
-    # declaring flash regsions effectively determines the memory map
-    # gdb's 'load', 'break' commands need to differentiate between flash and ram to work 
-    mdetect.declare_flash_bank(mcu)
-    mdetect.set_target_reset_method(adapter, cortex_m_variant)
-    mdetect.openocd_init()
-    # OpenOCD gdbserver is up after 'init'
+            gdb_args.append(a)
+        i += 1
+            
+    o = None
+    try:
+        (adapter, dap_info, mcu_info, o) = openocd_setup(options)
+    except OpenOcdCortexMDetectError:
+        pass
+    if o is None:
+        # ST DBGMCU_IDCODE reads often fail right after plugging the board in
+        # where openocd's "poll" also failed
+        (adapter, dap_info, mcu_info, o) = openocd_setup(options)
 
     gdb_name = os.environ.get('GDB')
     if gdb_name is None:
-        gdb_name = os.environ.get('HOST')
+        t = os.environ.get('HOST')
+        if t is not None:
+            # e.g. 'arm-none-eabi' + '-gdb'
+            gdb_name = '%s-gdb' % (t,)
+
     if gdb_name is None:
+        logging.warning('Can your "gdb" command really debug ARM Cortex-M targets? Export GDB or HOST environment variables if this fails')
         gdb_name = 'gdb'
-    else:
-        # e.g. 'arm-none-eabi' + '-gdb'
-        gdb_name = '%s-gdb' % (gdb_name,)
     
     if options.gdb_file is not None:
         # gdb -ex 'file ELF'
         # $(GDB) -q -x preferences.gdb -x openocd.gdb -ex "file $(PROJ_NAME).elf"
-        gdb_args = '-ex "file %s"' % (options.gdb_file,)
+        gdb_args = ['-ex "file %s"' % (options.gdb_file,)] + gdb_args
+
+    gdb_args = ['-q',
+                '-ex', 'set pagination 0',
+                '-ex', 'set confirm 0',
+                # OpenOCD doesn't support gdb nonstop mode yet
+                # set non-stop 1
+                # set target-async 1
+                '-ex', 'target extended-remote :%d' % (o.gdb_port(),) ] + gdb_args
     try:
         r = subprocess.call([gdb_name] + gdb_args) 
-    except NoSuchFileError as e:
+    except FileNotFoundError as e:
         print('%s: "%s" not found' % (program_name(), gdb_name), file=sys.stderr)
         sys.exit(1)
 
