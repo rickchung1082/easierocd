@@ -1,3 +1,7 @@
 * tmux: session cleanup
-* tmux: where isn't openocd output showing?
+	Have libexec/pause exit on openocd daemon exit
+	Linux USB (bus, device), the device part keeps incraesing
+* OpenOCD: 2nd tcl port connect
+
+DONE:
 * easierocd/arm: map 'partno' to Cortex-M product names 'cortex_m0_r0p0'

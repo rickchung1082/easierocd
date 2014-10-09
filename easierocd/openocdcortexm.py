@@ -6,7 +6,7 @@ import logging
 
 from easierocd.arm import dpidr_decode
 import easierocd.stm32 as stm32
-from easierocd.openocd import (OpenOcdError, TargetMemoryAccessError)
+from easierocd.openocd import (OpenOcdError, TargetMemoryAccessError, TargetDapError)
 
 class OpenOcdCortexMDetectError(Exception):
     pass
@@ -50,7 +50,7 @@ def openocd_low_level_transport_to_trasnport(t):
     elif t in { 'swd', 'jtag' }:
         return t
     else:
-        import IPython; IPython.embed()
+        #import IPython; IPython.embed()
         raise ValueError
 
 class OpenOcdCortexMDetect(object):
@@ -156,7 +156,10 @@ class OpenOcdCortexMDetect(object):
         'Detect ARM CPU core through the Debug Access Port (assume ADI v5+)'
         info = None
         if self.openocd_transport is None:
-            self.openocd_low_level_transport = self.orpc.get_transport()
+            t = self.orpc.get_transport()
+            if not t:
+                raise TargetDapError(self.orpc, t)
+            self.openocd_low_level_transport = t
             self.openocd_transport = openocd_low_level_transport_to_trasnport(self.openocd_low_level_transport)
 
         if self.openocd_transport == 'swd':
@@ -232,8 +235,9 @@ class OpenOcdCortexMDetect(object):
         data_dir = os.path.realpath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'share', 'easierocd'))
         if mcu_info['silicon_vendor'] == 'st' and mcu_info['stm32_family'] == 'stm32l1':
             self.orpc.call('source %s' % (os.path.join(data_dir, 'stm32l_helpers.cfg')))
-            # FIXME: does setting variables work through TCL RPC? handlers not firing
             self.orpc.call('set _TARGETNAME %s.cpu' % (chip_name_from_mcu_info(mcu_info)))
+            #  reset-start, restart-end handlers only fire on "openocd -c reset" (including 'reset init')
+            #  reset-init handlers only fire on "openocd -c 'reset init'"
             self.orpc.call('source %s' % (os.path.join(data_dir, 'stm32l_handlers.cfg')))
 
     def openocd_init_for_cortex_m(self, transport, dap_info, mcu_info):

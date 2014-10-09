@@ -1,0 +1,33 @@
+$ ./bin/easierocd-gdb DEBUG:root:device: USB(0x0483, 0x374b)
+DEBUG:root:device: USB(0x8087, 0x0020)
+DEBUG:root:device: USB(0x1d6b, 0x0002)
+DEBUG:root:device: USB(0x05c8, 0x0403)
+DEBUG:root:device: USB(0x138a, 0x0007)
+DEBUG:root:device: USB(0x03f0, 0x231d)
+DEBUG:root:device: USB(0x8087, 0x0020)
+DEBUG:root:device: USB(0x1d6b, 0x0002)
+DEBUG:root:OpenOcdRrc connect: host: 127.0.0.1, port: 6666
+DEBUG:root:OpenOcdRpc <- b'initialized'
+Traceback (most recent call last):
+  File "/home/scottt/work/easierocd/easierocd/openocd.py", line 78, in recv_msg
+    d = next(self.msg_iter)
+StopIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "./bin/easierocd-gdb", line 417, in <module>
+    main_function_dispatch(program_name(), sys.argv[1:])
+  File "./bin/easierocd-gdb", line 411, in main_function_dispatch
+    sys.exit(f(args))
+  File "./bin/easierocd-gdb", line 360, in easierocd_gdb
+    (adapter, dap_info, mcu_info, o) = openocd_setup(options)
+  File "./bin/easierocd-gdb", line 228, in openocd_setup
+    openocd_initialized = o.initialized()
+  File "/home/scottt/work/easierocd/easierocd/openocd.py", line 190, in initialized
+    r = self.call('initialized')
+  File "/home/scottt/work/easierocd/easierocd/openocd.py", line 94, in call
+    return self.recv_msg()
+  File "/home/scottt/work/easierocd/easierocd/openocd.py", line 80, in recv_msg
+    raise ConnectionError
+ConnectionError

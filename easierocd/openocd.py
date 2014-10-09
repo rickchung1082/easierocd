@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import re
 import ctypes
 import logging
 import socket
@@ -19,6 +20,12 @@ class OpenOcdError(Exception):
             self.cmd, self.response)
 
     __repr__ = __str__
+
+class TargetDapError(OpenOcdError):
+    pass
+
+class TargetCommunicationError(OpenOcdError):
+    pass
 
 class TargetMemoryAccessError(OpenOcdError):
     pass
@@ -97,10 +104,16 @@ class OpenOcdRpc(object):
         if self.ocd_transport is None:
             self.ocd_transport = self.get_transport()
         if self.ocd_transport.startswith('hla_'):
-            r = self.call('capture hla_idcode')
+            cmd = 'capture hla_idcode'
         else:
-            r = self.call('capture dap_idcode')
-        return int(r, base=16)
+            cmd = 'capture dap_idcode'
+
+        r = self.call(cmd)
+        try:
+            idcode = int(r, base=16)
+        except ValueError:
+            raise TargetDapError(cmd, r)
+        return idcode
 
     def read_word(self, addr):
         r = self.call('ocd_mdw 0x%x' % (addr,))
@@ -195,6 +208,35 @@ class OpenOcdRpc(object):
         r = self.call('ocd_target names')
         return [ x.decode('ascii') for x in r.split() if x ]
 
+    def poll(self):
+        'poll target CPU'
+
+        # Success
+        # <- b'ocd_poll'
+        # -> b'background polling: on\nTAP: stm32l1.cpu (enabled)\ntarget state: halted\ntarget halted due to breakpoint, current mode: Thread \nxPSR: 0x81000000 pc: 0x08000ede msp: 0x20014000\n'
+        # Failture
+        # <- b'ocd_poll'
+        # -> b'background polling: on\nTAP: stm32l1.cpu (enabled)\nPrevious state query failed, trying to reconnect\njtag status contains invalid mode value - communication failure\n'
+
+        r = self.call('ocd_poll')
+        r_str = r.decode('ascii')
+        if re.search(r'[\s]communication failure[\s]', r_str):
+            raise TargetCommunicationError('ocd_poll', r)
+        
+        # s = b'target halted due to breakpoint, current mode: Thread '
+        out = {}
+
+        current_mode_re = r'[\s]current mode: ([\w]*)'
+        m = re.search(current_mode_re, r_str, re.DOTALL)
+        if m:
+            out['current_mode'] = m.groups()[0].lower()
+
+        pc_regs_re = r'.*[\s]xPSR: 0x(?P<xPSR>[\w]*) pc: 0x(?P<pc>[\w]*) msp: 0x(?P<msp>[\w]*)'
+        m = re.search(pc_regs_re, r_str, re.DOTALL)
+        if m:
+            out.update(m.groupdict())
+        return out
+
     def f():
             import IPython; IPython.embed()
             
@@ -204,6 +246,9 @@ def test():
     o = OpenOcdRpc(port=6666)
 
     if 1:
+        o.poll()
+
+    if 0:
         o.target_names()
 
     if 0:

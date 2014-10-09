@@ -1,4 +1,5 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
+
 import sys
 import os
 import errno
@@ -14,7 +15,7 @@ import logging
 import easierocd.usb
 from easierocd.usb import UnsupportedAdapter
 import easierocd.openocd
-from easierocd.openocd import (OpenOcdError)
+from easierocd.openocd import (OpenOcdError, TargetCommunicationError, TargetDapError)
 import easierocd.arm
 from easierocd.util import (Bag, HexDict, waitpid_ignore_echild, kill_ignore_echild)
 from easierocd.openocdcortexm import (OpenOcdCortexMDetect,
@@ -115,7 +116,8 @@ def openocd_start(adapter):
                        '-c', 'telnet_port %d' % (telnet_port,),
                        '-c', 'noinit']
         openocd_stderr = tempfile.TemporaryFile(mode='w+')
-        openocd_process = subprocess.Popen(openocd_cmd, stderr=openocd_stderr, stdin=tmux_pty_fd, stdout=tmux_pty_fd)
+        openocd_process = subprocess.Popen(openocd_cmd, stderr=openocd_stderr, stdin=tmux_pty_fd, stdout=tmux_pty_fd,
+                                          start_new_session=True)
         time.sleep(0.001)
         r = openocd_process.poll()
         if r is None:
@@ -228,10 +230,20 @@ def openocd_setup(options):
     openocd_initialized = o.initialized()
     target_names = o.target_names()
 
-    logging.debug('target_name: %r' % (target_names,))
-    if openocd_initialized and len(target_names) >= 1  and target_names[0] != 'EASIEROCD_DETECT.cpu':
-        mdetect = OpenOcdCortexMDetect(options, adapter, o)
+    # Mostly for USB cable or SWD/JTAG wire unplugs
+    try:
+        poll_info = o.poll()
+    except TargetCommunicationError:
+        poll_info = None
+    mdetect = OpenOcdCortexMDetect(options, adapter, o)
+    try:
         dap_info = mdetect.detect_dap()
+    except TargetDapError:
+        dap_info = None
+
+    logging.debug('target_name: %r' % (target_names,))
+    if (openocd_initialized and len(target_names) >= 1  and target_names[0] != 'EASIEROCD_DETECT.cpu' and
+        poll_info is not None and dap_info is not None):
         mcu_info = mdetect.detect_mcu(dap_info)
     else:
         if openocd_newly_started_or_not == OPENOCD_ALREADY_STARTED:
@@ -254,6 +266,7 @@ def openocd_setup(options):
             # protocol or connection error
             assert(o.pid is not None)
             kill_ignore_echild(o.pid, signal.SIGTERM)
+            subprocess.call(['tmux', 'kill-session', '-t', tmux_session_name_for_adapter(adapter)])
             time.sleep(0.01)
             (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
             mdetect = OpenOcdCortexMDetect(options, adapter, o)
@@ -280,7 +293,7 @@ def openocd_setup(options):
                 # protocol or connection error
                 assert(o.pid is not None)
                 kill_ignore_echild(o.pid, signal.SIGTERM)
-                # FIXME: connect
+                subprocess.call(['tmux', 'kill-session', '-t', tmux_session_name_for_adapter(adapter)])
                 mdetect.openocd_init_for_detection(openocd_transport)
                 try:
                     dap_info = mdetect.detect_dap()
@@ -387,12 +400,37 @@ def easierocd_gdb(args):
                 # OpenOCD doesn't support gdb nonstop mode yet
                 # set non-stop 1
                 # set target-async 1
-                '-ex', 'target extended-remote :%d' % (o.gdb_port(),) ] + gdb_args
+                '-ex', 'target extended-remote :%d' % (o.gdb_port(),),
+                # TODO: implement gdb non-stop mode in OpenOCD
+                '-ex', 'monitor halt',
+               ] + gdb_args
+
     try:
-        r = subprocess.call([gdb_name] + gdb_args) 
+        gdb_process = subprocess.Popen([gdb_name] + gdb_args)
     except FileNotFoundError as e:
         print('%s: "%s" not found' % (program_name(), gdb_name), file=sys.stderr)
         sys.exit(1)
+
+    # GDB uses SIGINT to interrupt its blocking commands.
+    # see http://www.cons.org/cracauer/sigint.html
+    sigint_received = False
+    while True:
+        try:
+            r = gdb_process.wait()
+        except KeyboardInterrupt:
+            sigint_received = True
+        else:
+            if sigint_received:
+                if os.WIFSIGNALED(r):
+                    if os.WTERMSIG(r) == signal.SIGINT:
+                        # SIGINT self
+                        os.kill(os.getpid(), SIGINT)
+            break
+
+    if os.WIFEXITED(r):
+        sys.exit(r)
+    else:
+        sys.exit(3)
 
 @main_function
 def easierocd_program(args):
