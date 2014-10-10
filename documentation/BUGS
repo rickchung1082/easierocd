@@ -1,7 +1,8 @@
 * tmux: session cleanup
 	Have libexec/pause exit on openocd daemon exit
-	Linux USB (bus, device), the device part keeps incraesing
+	Linux USB (bus, addr), the 'addr' part keeps incraesing
 * OpenOCD: 2nd tcl port connect
+* OpenOCD reset-init clock setup, squire this with CMSIS SystemClock somehow
 
 DONE:
 * easierocd/arm: map 'partno' to Cortex-M product names 'cortex_m0_r0p0'

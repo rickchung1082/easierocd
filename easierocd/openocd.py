@@ -172,7 +172,11 @@ class OpenOcdRpc(object):
                 raise OpenOcdError(cmd='ocd_load_image', response=r)
 
     def shutdown(self):
-        r = self.call('ocd_shutdown')
+        try:
+            r = self.call('ocd_shutdown')
+        except ConnectionResetError:
+            return
+
         if r.strip() != b'shutdown command invoked':
             raise OpenOcdError(cmd='ocd_shutdown', response=r)
 
@@ -220,7 +224,10 @@ class OpenOcdRpc(object):
 
         r = self.call('ocd_poll')
         r_str = r.decode('ascii')
+        #import IPython; IPython.embed()
         if re.search(r'[\s]communication failure[\s]', r_str):
+            #assert(0)
+            logging.debug('ocd_poll: communication error')
             raise TargetCommunicationError('ocd_poll', r)
         
         # s = b'target halted due to breakpoint, current mode: Thread '
@@ -236,6 +243,13 @@ class OpenOcdRpc(object):
         if m:
             out.update(m.groupdict())
         return out
+
+    def set_arm_semihosting(self, enable):
+        if enable:
+            enable_str = 'enable'
+        else:
+            enable_str = 'disable'
+        r = self.call('arm semihosting %s' % (enable_str,))
 
     def f():
             import IPython; IPython.embed()

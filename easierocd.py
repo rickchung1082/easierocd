@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import sys
 import os
 import errno
@@ -78,6 +79,32 @@ def tmux_pane_get_pty(tmux_target):
     # strip '\n' at end
     return (''.join(out))[:-1]
 
+def tmux_sessions_cleanup(connected_adapters):
+    p = subprocess.Popen(['tmux', 'list-sessions'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    response = p.stdout.read()
+    if not response:
+        return
+
+    connected_usb_bus_addr = { (a_dev.bus, a_dev.address) for (a_info, a_dev) in connected_adapters }
+
+    # b'openocd-ST-LinkV2-1-usb-2-109: 1 windows (created Thu Oct  9 15:37:00 2014) [140x41] (attached)\n'
+    l = response.split(b'\n')
+    for i in l:
+        try:
+            session_name = i.split()[0][:-1].decode('ascii') # strip ':' at end
+        except IndexError:
+            continue
+
+        m = re.search(r'-usb-(?P<bus>[\d]*)-(?P<addr>[\d]*)', session_name)
+        if m:
+            d = m.groupdict()
+            session_bus_addr = (int(d['bus']), int(d['addr']))
+            if session_bus_addr not in connected_usb_bus_addr:
+                r = subprocess.call(['tmux', 'kill-session', '-t', session_name])
+                if r != 0:
+                    logging.warning('tmux kill-session -t %s failed' % (session_name,))
+                continue
+
 # OpenOCD control: one process per debug adapter
 
 def openocd_start(adapter):
@@ -110,13 +137,14 @@ def openocd_start(adapter):
     (gdb_port, telnet_port, tcl_port) = (3333, 4444, 6666)
     while 1:
         openocd_cmd = ['openocd', 
-                       '-l', '/tmp/easierocd-openocd.log',
+                       # '-l', '/tmp/easierocd-openocd.log',
                        '-c', 'tcl_port %d' % (tcl_port,),
                        '-c', 'gdb_port %d' % (gdb_port,),
                        '-c', 'telnet_port %d' % (telnet_port,),
                        '-c', 'noinit']
-        openocd_stderr = tempfile.TemporaryFile(mode='w+')
-        openocd_process = subprocess.Popen(openocd_cmd, stderr=openocd_stderr, stdin=tmux_pty_fd, stdout=tmux_pty_fd,
+        # openocd_stderr = tempfile.TemporaryFile(mode='w+')
+        openocd_process = subprocess.Popen(openocd_cmd,
+                                           stdin=tmux_pty_fd, stdout=tmux_pty_fd, stderr=tmux_pty_fd,
                                           start_new_session=True)
         time.sleep(0.001)
         r = openocd_process.poll()
@@ -125,6 +153,8 @@ def openocd_start(adapter):
         # TODO: make OpenOCD support local sockets and Windows Named Pipes
         tcl_port = random.randrange(1025, 65535)
         (gdb_port, telnet_port) = (tcl_port + 1, tcl_port + 2)
+
+    logging.debug('openocd_start: pid: %d, tcl_port: %d' % (openocd_process.pid, tcl_port))
     return (openocd_process.pid, tcl_port)
 
 def _start_openocd_rpc_write_pid(fd, adapter):
@@ -224,9 +254,11 @@ def openocd_setup(options):
         if len(adapters) == 1:
             adapter = adapters[0]
         else:
-            adapter = interactive_choose_adapters(adapters)
+            adapter = interactive_choose_adapter(adapters)
 
+    tmux_sessions_cleanup(adapters)
     (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+    logging.debug('openocd_newly_started_or_not: %d' % (openocd_newly_started_or_not,))
     openocd_initialized = o.initialized()
     target_names = o.target_names()
 
@@ -238,14 +270,22 @@ def openocd_setup(options):
     mdetect = OpenOcdCortexMDetect(options, adapter, o)
     try:
         dap_info = mdetect.detect_dap()
-    except TargetDapError:
+    except OpenOcdCortexMDetectError:
+        logging.debug('detect_dap: OpenOcdCortexMDetectError')
         dap_info = None
 
-    logging.debug('target_name: %r' % (target_names,))
+    if poll_info is None or dap_info is None:
+        o.shutdown()
+        waitpid_ignore_echild(o.pid)
+        (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
+
+    logging.debug('target_name: %r, poll_info: %r, dap_info: %r' % (target_names, poll_info, dap_info))
     if (openocd_initialized and len(target_names) >= 1  and target_names[0] != 'EASIEROCD_DETECT.cpu' and
         poll_info is not None and dap_info is not None):
+        # reuse existing OpenOCD daemon
         mcu_info = mdetect.detect_mcu(dap_info)
     else:
+        logging.debug('Attempting OpenOCD Cotex-M probe')
         if openocd_newly_started_or_not == OPENOCD_ALREADY_STARTED:
             o.shutdown()
             waitpid_ignore_echild(o.pid)
@@ -287,7 +327,7 @@ def openocd_setup(options):
             openocd_transport = 'jtag'
             try:
                 mdetect.openocd_init_for_detection(openocd_transport)
-            except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
+            except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter):
                 dap_info = None
             else:
                 # protocol or connection error
@@ -297,11 +337,11 @@ def openocd_setup(options):
                 mdetect.openocd_init_for_detection(openocd_transport)
                 try:
                     dap_info = mdetect.detect_dap()
-                except OpenOcdCortexMDetectError as e:
+                except OpenOcdCortexMDetectError:
                     dap_info = None
 
         if dap_info is None:
-            stderr.write('%s: failed to detect ARM Debug Access Port, aborting\n' % (program_name(),))
+            sys.stderr.write('%s: failed to detect ARM Debug Access Port, aborting\n' % (program_name(),))
             sys.exit(3)
 
         logging.info('dap_info: %r' % (HexDict(dap_info),))
@@ -355,15 +395,18 @@ def easierocd_gdb(args):
             print_usage_exit()
         elif a == '--easierocd-gdb-file':
             try:
-                options.gdb_file = a[i+1]
+                options.gdb_file = args[i+1]
             except IndexError:
                 sys.stderr.write('%s: --easierocd-gdb-file requires an argument\n' % (program_name(),))
+                sys.exit(2)
             i += 1
         elif a == '--easierocd-adapter':
             try:
-                options.adapter_usb_id = a[i+1]
+                options.adapter_usb_id = args[i+1]
             except IndexError:
                 sys.stderr.write('%s: --easierocd-adapter requires an argument\n' % (program_name(),))
+                sys.exit(2)
+            i += 1
         else:
             gdb_args.append(a)
         i += 1
@@ -377,6 +420,11 @@ def easierocd_gdb(args):
         # ST DBGMCU_IDCODE reads often fail right after plugging the board in
         # where openocd's "poll" also failed
         (adapter, dap_info, mcu_info, o) = openocd_setup(options)
+
+    o.set_arm_semihosting(True)
+
+    # TODO: Free up TCL port? Think about concurrent debug & program
+    # o.disconnect()
 
     gdb_name = os.environ.get('GDB')
     if gdb_name is None:
@@ -392,7 +440,7 @@ def easierocd_gdb(args):
     if options.gdb_file is not None:
         # gdb -ex 'file ELF'
         # $(GDB) -q -x preferences.gdb -x openocd.gdb -ex "file $(PROJ_NAME).elf"
-        gdb_args = ['-ex "file %s"' % (options.gdb_file,)] + gdb_args
+        gdb_args = ['-ex', 'file %s' % (options.gdb_file,)] + gdb_args
 
     gdb_args = ['-q',
                 '-ex', 'set pagination 0',

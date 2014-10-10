@@ -158,12 +158,15 @@ class OpenOcdCortexMDetect(object):
         if self.openocd_transport is None:
             t = self.orpc.get_transport()
             if not t:
-                raise TargetDapError(self.orpc, t)
+                raise OpenOcdCortexMDetectError
             self.openocd_low_level_transport = t
             self.openocd_transport = openocd_low_level_transport_to_trasnport(self.openocd_low_level_transport)
 
         if self.openocd_transport == 'swd':
-            idcode = self.orpc.idcode()
+            try:
+                idcode = self.orpc.idcode()
+            except TargetDapError:
+                raise OpenOcdCortexMDetectError
             info = dpidr_decode(idcode)
             info['idcode'] = idcode
         elif self.openocd_transport == 'jtag':
