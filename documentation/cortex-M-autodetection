@@ -30,7 +30,8 @@ Connect under reset so that the MCU is in a known state:
 
 == Vendor Specific Device ID Registers
 	* STM32 (see documentation/STM32)
-	** DBGMCU_IDCODE register @0xE0042000, readable even if CPU is down (decode code DONE)
+	** DBGMCU_IDCODE register = 0xE0042000, readable even if CPU is down (decode code DONE)
+        ** DBGMCU_IDCODE_ADDR_STM32LO = 0x40015800
 	** See also OpenOCD: stm32f2x.c
 
 	* TI Tiva, Stellaris (see documentation/TI-Tiva-Stellaris)
@@ -39,14 +40,18 @@ Connect under reset so that the MCU is in a known state:
 
 	* NXP LPC
 	** lpc11xx: DEVICE_ID register at 0x400483F4 (only valid for parts of the lpc1100, 1100c, 1100l series)
-	** lpc1100xl, IAP command, can't use DEVICE_ID register 
+	** lpc1100xl, IAP command, can't use DEVICE_ID register (See NXP-LPC)
 
 	* Nordic
-	** nRF51 Series:
+	** nRF51 Series?
+	** nRF51-Mbed board have built-in CMSIS-DAP adapter. Board ID command supported?
+	** nRF51-SDKxxx board (the one with JLink)?
 
 	* Freescale?
+	** FRDM boards have built-in CMSIS-DAP adapter. Board ID command supported?
 
 	* Atmel?
+	** Xplained boards have built-in CMSIS-DAP adapter. Board ID command supported?
 
 == Connect Assert SRST (Connect Under Reset)
 # connect_assert_srst is the same as "connect under reset" in Keil uVision

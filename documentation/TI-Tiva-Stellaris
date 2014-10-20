@@ -1,3 +1,11 @@
+= TM4C123G
+
+OpenOCD: stellaris_read_part_info()
+
+SCB_BASE 0x400FE000
+DID0          0x000
+DID1          0x004
+
 Tiva C Series TM4C123GH6PM Data Sheet
 Section 5.2.1 Device Identification
 

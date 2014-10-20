@@ -1,0 +1,13 @@
+= Debug Adapter: Target Voltage
+hla_target_voltage
+
+= Debug Adapter: Firmware Version
+hla_firmware_version
+
+= OpenOCD: differentiate Config staage and Run stage
+Usae Case: "openocd -c noinit" and programmatic OpenOCD configuration
+ocd_initialized
+
+= ARM Debug Interface v5 DAP IDCODE
+hla_idcode
+dap_idcode

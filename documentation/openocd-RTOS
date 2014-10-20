@@ -1,0 +1,5 @@
+$target_name configure -rtos <RTOS_TYPE>
+http://openocd.sourceforge.net/doc/html/CPU-Configuration.html#rtostype
+
+RTOS_TYPE:
+http://openocd.sourceforge.net/doc/html/GDB-and-OpenOCD.html#index-RTOS-Support-563

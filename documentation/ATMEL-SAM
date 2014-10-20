@@ -1,0 +1,73 @@
+OpenOCD: at91sam3.c at91sam4.c at91sam4l.c at91samd.c
+
+
+SAM G uses the at91sam4.c flash algorithm
+SAM D: Cortex-M0+ 
+SAM 4: 
+
+# Cortex-A5:  SAMA5
+# ARM7TDMI:   at91sam7.c
+# ARM926EJ-S: at91sam9.c
+# NOT relevant: flash/nand/at91sam9.c
+
+= SAM3
+SAM3_CHIPID_CIDR          (0x400E0740)
+SAM3_CHIPID_CIDR2         (0x400E0940) /*SAM3X and SAM3A cidr at this address*/
+SAM3_CHIPID_EXID          (0x400E0744)
+SAM3_CHIPID_EXID2         (0x400E0944) /*SAM3X and SAM3A cidr at this address*/
+
+OpenOCD: at91sam3.c
+	/* Chip identification register
+	 *
+	 * Unfortunately, the chip identification register is not at
+	 * a constant address across all of the SAM3 series'. As a
+	 * consequence, a simple heuristic is used to find where it's
+	 * at...
+	 *
+	 * If the contents at the first address is zero, then we know
+	 * that the second address is where the chip id register is.
+	 * We can deduce this because for those SAM's that have the
+	 * chip id @ 0x400e0940, the first address, 0x400e0740, is
+	 * located in the memory map of the Power Management Controller
+	 * (PMC). Furthermore, the address is not used by the PMC.
+	 * So when read, the memory controller returns zero.*/
+	if (pChip->cfg.CHIPID_CIDR == 0)	{
+		/*Put the correct CIDR and EXID values in the pChip structure */
+		pChip->cfg.CHIPID_CIDR = pChip->cfg.CHIPID_CIDR2;
+		pChip->cfg.CHIPID_EXID = pChip->cfg.CHIPID_EXID2;
+	}
+
+= SAM4S, SAM4L [CHIPID_CIDR:   0x400E0740 CHIPID_EXTID:  0x400E0744]
+= SAMG53
+http://www.atmel.com/Images/Atmel_11240_32-bit-Cortex-M4-Microcontroller_SAM-G53_Datasheet.pdf
+
+CHIPID_CIDR:   0x400E0740
+CHIPID_EXTID:  0x400E0744
+
+"25. Chip Identifier (CHIPID)
+25.1 Description
+Chip Identifier (CHIPID) registers permit recognition of the device and its revision. These registers provide the
+sizes and types of the on-chip memories, as well as the set of embedded peripherals.
+Two chip identifier registers are embedded: CHIPID_CIDR (Chip ID Register) and CHIPID_EXID (Extension ID).
+Both registers contain a hard-wired value that is read-only. The first register contains the following fields:
+ EXT: Shows the use of the extension identifier register
+ NVPTYP and NVPSIZ: Identify the type of embedded non-volatile memory and the size
+ ARCH: Identifies the set of embedded peripherals
+ SRAMSIZ: Indicates the size of the embedded SRAM
+ EPROC: Indicates the embedded ARM processor
+ VERSION: Identifies the revision of the silicon
+The second register is device-dependent and reads 0 if the bit EXT is 0"
+
+See "25.3.1 Chip ID Register" field bits
+
+Chip ID Registers
+Chip Name CHIPID_CIDR CHIPID_EXID
+SAMG53G19 0x247E0AE0  0x0
+SAMG53N19 0x247E0AE8  0x0
+
+= SAMD
+OpenOCD: at91samd.c
+
+SAMD_DSU + SAMD_DSU_DID: 0x41002018
+#define SAMD_DSU         0x41002000	/* Device Service Unit */
+#define SAMD_DSU_DID           0x18     /* Device ID register */

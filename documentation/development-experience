@@ -1,0 +1,64 @@
+= EasierOCD Developer Experience
+
+== Basic Usage
+
+Goal: make Cortex-M development act like Linux C/C++ command line development
+Weakness compared to Arduino: must rebuild code to operate without a computer
+
+* (optional) eocd-setup # Only required when using more than 1 debug adapter or custom board
+$ eocd-gdb
+$ eocd-flash
+** gdbserver terminates connection with gdb
+$ eocd-gdb
+$ eocd-console # see your printfs (transport could be ARM Semihosting or ARM Insight SWO)
+** Some developers like printfs to be in the GDB console, e.g. codec2/stm32. Support?
+*** Yes, if goal is to to simulate native development
+*** Program reading same TTY as gdb for STDIN won't work in GDB non-stop mode
+$ eocd-loader ELF
+** STDIO redirected here
+** breaks into GDB on default on processor faults
+$ eocd-graph # Interacgive GUI. Graph global variables like a logical analyzer
+$ eocd-perf record ; report
+$ eocd-perf top
+$ eocd-perf wakeup
+
+RPC: desire to call custom functions from the MCU will be strong => Tie in for PyMuLink
+Send asynchronous events to the MCU through PyMuLink? memory mailbox over PyMuLink, halt and change CPU control flow
+Receive synchronous events from the MCU through PyMuLink? ITM over SWO
+
+== Original OpenOCD Developer Experience
+* Grep for board or target CPU in OpenOCD scripts
+$ openocd -f BOARD.cfg
+$ gdb
+$ killall openocd # BAD: avoidable
+$ openocd -f BOARD.cfg -c program ELF
+$ openocd -f BOARD.cfg
+$ gdb
+
+== Further Improvements
+* easierocd-flash: delta flashing
+** Implement in gdbserver (i.e. OpenOCD)
+** When flashing the 1st time, maybe calculate flash block checksums on device and send the checksums back
+** After flashing the 1st time in a debug session, keep state to know the flash content
+* easierocd-flash: use openocd -c 'reset init' to switch taget CPU to higher clock and speed up programming
+** Experiment: measure this no the STM32L1
+* WFI and clocks: make debugging always work at a cost to power consumption
+* eocd-gdb: RTOS awareness
+** Provide thread safe version of: malloc, printf (newlib-nano)
+* eocd-gdb: gdb non-stop mode
+
+== PyMuLink
+(?) Goal: debug + generic RPC and async events
+Problem: Python calls MCU code.
+(Brain Storm) Interaction Modes:
+** C code breaks into IPython: explicit request and static probe points?
+** Write a function in C, test from Python: provide input, visualize computation, verify output
+*** Look at unitetst frameworks
+*** Debuggers know types (e.g. through DWARF), don't make users declare types like 'ctypes'
+*** What happens in the C code segfaults? A: break into gdb
+** Python visualizing SWV data in realtime
+
+$ pymulink{3,2}
+
+* How fast is the link (SWD, JTAG) for streaming data?
+** Use case: streaming PCM samples for output

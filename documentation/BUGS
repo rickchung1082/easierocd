@@ -1,8 +1,14 @@
-* tmux: session cleanup
-	Have libexec/pause exit on openocd daemon exit
-	Linux USB (bus, addr), the 'addr' part keeps incraesing
+* ST-Link/V2: detect stlink firmware version to warn about serial number change bug and ask user to update the firmware
+* ST-Link/V2: detect target voltage, 
+
 * OpenOCD: 2nd tcl port connect
-* OpenOCD reset-init clock setup, squire this with CMSIS SystemClock somehow
+* OpenOCD: reset-init clock setup, squire this with CMSIS SystemClock somehow
 
 DONE:
+* st-link/v2 serial keeps changing
+	* Happens to both standalone dongles and discovery boards
+	* SOLUTION: firmware update: http://wunderkis.de/stlink-serialno/index.html 
 * easierocd/arm: map 'partno' to Cortex-M product names 'cortex_m0_r0p0'
+* tmux: session cleanup
+	Linux USB (bus, addr), the 'addr' part keeps incraesing
+	(NOT DONE): Have libexec/pause exit on openocd daemon exit
