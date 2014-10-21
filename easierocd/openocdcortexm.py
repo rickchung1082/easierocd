@@ -7,6 +7,7 @@ import logging
 from easierocd.arm import dpidr_decode
 import easierocd.stm32 as stm32
 from easierocd.openocd import (OpenOcdError, TargetMemoryAccessError, TargetDapError)
+from easierocd.util import (hex_str_literal_double_quoted)
 
 class OpenOcdCortexMDetectError(Exception):
     pass
@@ -100,12 +101,11 @@ class OpenOcdCortexMDetect(object):
         if ocd_intf == 'hla':
             hla_layout = o['hla_layout']
             orpc.command('hla_layout %s' % (hla_layout,))
-            orpc.command('hla_device_desc %r' % (self.adapter_info['name'],))
+            orpc.command('hla_device_desc %s' % (hex_str_literal_double_quoted(self.adapter_info['name']),))
             orpc.command('hla_vid_pid 0x%04x 0x%04x' % (self.usb_device.idVendor, self.usb_device.idProduct))
-            # See http://wunderkis.de/stlink-serialno/index.html
-            # orpc.command('hla_serial %r' % (self.usb_device.serial_number,))
+            orpc.command('hla_serial %s' % (hex_str_literal_double_quoted(self.usb_device.serial_number),))
         else:
-            pass
+            assert(0)
 
         if ocd_intf == 'hla':
             if transport == 'swd':
@@ -139,18 +139,16 @@ class OpenOcdCortexMDetect(object):
         if adapter_has_reset_line:
             r = orpc.command('reset_config srst_only')
         # FIXME: support srst_gate devices like the LPC1xxx
-        r = orpc.command('reset_config connect_assert_srst')
+        # FIXME: connect_assert_srst hard codes intrusive probing, make this configurable
+        r = orpc.command('reset_config srst_nogate connect_assert_srst')
 
         # MCU firmware possibly need to leave JTAG / SWD in usable state for a short time  after reset
         # for OpenOCD to successfully connect.
         # This is basically a race condition between the debug adapter and the firmware after reset.
-
-        r = orpc.call('ocd_init')
-        logging.debug('ocd_init -> %r' % (r,))
-        responses = r.split(b'\n')
-        for r in responses:
-            if r == b'open failed':
-                raise OpenOcdOpenFailedDuringInit
+        try:
+            orpc.openocd_init()
+        except OpenOcdError as e:
+            raise OpenOcdOpenFailedDuringInit(e.response)
 
     def detect_dap(self):
         'Detect ARM CPU core through the Debug Access Port (assume ADI v5+)'
@@ -189,7 +187,7 @@ class OpenOcdCortexMDetect(object):
             # FIXME: may be too tolerant
             m = stm32.dbgmcu_idcode_decode(stm32_idcode)
             m['silicon_vendor'] = 'st'
-            # 'STM32F405xx/07xx and STM32F415xx/17xx',
+            # e.g. 'STM32F405xx/07xx and STM32F415xx/17xx',
             m['stm32_family'] = (m['dev'].split()[0][:len('stm32**')]).lower()
             return m
 
@@ -273,9 +271,7 @@ class OpenOcdCortexMDetect(object):
         self.set_target_reset_config(dap_info, mcu_info)
         self.configure_reset_handlers(dap_info, mcu_info)
 
-        r = orpc.call('ocd_init')
-        logging.debug('ocd_init -> %r' % (r,))
-        responses = r.split(b'\n')
-        for r in responses:
-            if r == b'open failed':
-                raise OpenOcdOpenFailedDuringInit
+        try:
+            orpc.openocd_init()
+        except OpenOcdError:
+            raise OpenOcdOpenFailedDuringInit

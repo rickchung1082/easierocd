@@ -6,6 +6,8 @@ import logging
 import socket
 import tempfile
 import sys
+import time
+import errno
 
 class OpenOcdError(Exception):
     # FIXME: when the debug adapter is disconnecte
@@ -20,6 +22,9 @@ class OpenOcdError(Exception):
             self.cmd, self.response)
 
     __repr__ = __str__
+
+class OpenOcdInvalidCommandError(OpenOcdError):
+    pass
 
 class TargetDapError(OpenOcdError):
     pass
@@ -38,6 +43,9 @@ class OpenOcdValueError(ValueError, OpenOcdError):
         return '%s' % (self.args,)
 
     __repr__ = __str__
+
+class OpenOcdResetError(OpenOcdError):
+    pass
 
 class OpenOcdRpc(object):
     SEPARATOR = b'\x1a'
@@ -63,7 +71,9 @@ class OpenOcdRpc(object):
         while 1:
             t = self.conn.recv(self.BUFSIZE)
             if t == b'':
+                logging.warning('OpenOCD TCL RPC empty receive')
                 return
+
             while 1:
                 try:
                     i = t.index(self.SEPARATOR)
@@ -98,7 +108,11 @@ class OpenOcdRpc(object):
 
     def call(self, cmd):
         self.send_msg(cmd)
-        return self.recv_msg()
+        # e.g.  # -> b'invalid command name "ocd_getpid"'
+        r = self.recv_msg()
+        if r.startswith(b'invalid command name '):
+            raise OpenOcdInvalidCommandError(cmd, r)
+        return r
 
     def idcode(self):
         if self.ocd_transport is None:
@@ -171,7 +185,7 @@ class OpenOcdRpc(object):
             if ('downloaded ' not in r) or (' bytes in ' not in r):
                 raise OpenOcdError(cmd='ocd_load_image', response=r)
 
-    def shutdown(self):
+    def openocd_shutdown(self):
         try:
             r = self.call('ocd_shutdown')
         except ConnectionResetError:
@@ -179,10 +193,6 @@ class OpenOcdRpc(object):
 
         if r.strip() != b'shutdown command invoked':
             raise OpenOcdError(cmd='ocd_shutdown', response=r)
-
-    def declare_flash_bank(self):
-        assert(0)
-        self.call('ocd_flash_bank')
 
     def tcl_port(self):
         # same info should be available in 'self.port' but you never know
@@ -249,11 +259,56 @@ class OpenOcdRpc(object):
             enable_str = 'enable'
         else:
             enable_str = 'disable'
-        r = self.call('arm semihosting %s' % (enable_str,))
+        cmd_str = 'ocd_arm semihosting %s' % (enable_str,)
+        r = self.call(cmd_str)
+        # -> b'semihosting is enabled\n'
+        if b'semihosting is enabled' not in r:
+            raise OpenOcdError(cmd_str, r)
 
-    def f():
-            import IPython; IPython.embed()
-            
+    def openocd_init(self):
+        r = self.call('ocd_init')
+        logging.debug('ocd_init -> %r' % (r,))
+        # -> b"clock speed 300 kHz\nopen failed\nin procedure 'transport'\n"
+        # -> b"clock speed 300 kHz\nSTLINK v2 JTAG v23 API v2 SWIM v6 VID 0x0483 PID 0x374B\nusing stlink api v2\nTarget voltage: 3.245669\ninit mode failed\nin procedure 'transport'\n"
+
+        lines = r.split(b'\n')
+        if b'open failed' in lines:
+            logging.error('ocd_init: open failed')
+            raise OpenOcdError('ocd_init', r)
+        elif b'init mode failed' in lines:
+            logging.error('ocd_init: init mode failed')
+            raise OpenOcdError('ocd_init', r)
+        elif [ x for x in lines if x.endswith(b' failed') ]:
+            raise OpenOcdError('ocd_init: something failed', r)
+
+    def reset(self):
+        self.command('ocd_reset')
+
+    def reset_halt(self):
+        r = self.call('ocd_reset halt')
+        if b'target state: halted' not in r:
+            raise OpenOcdResetError('ocd_reset halt', r)
+
+    def reset_init(self):
+        r = self.call('ocd_reset init')
+        if b'target state: halted' not in r:
+            raise OpenOcdResetError('ocd_reset init', r)
+
+    def halt(self):
+        self.command('ocd_halt')
+        #r = self.call('ocd_halt')
+
+    def close(self):
+        try:
+            self.conn.shutdown(socket.SHUT_RDWR)
+        except OSError as e:
+            if e.errno != errno.ENOTCONN:
+                raise
+        self.conn.close()
+
+    def getpid(self):
+        r = self.call('getpid')
+        return int(r.decode('ascii'))
 
 def test():
     logging.basicConfig(level=logging.DEBUG)

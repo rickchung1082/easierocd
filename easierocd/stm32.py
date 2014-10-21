@@ -8,11 +8,15 @@ import doctest
 # MCU Device ID Code: MCU part number and revision.
 # Available even while MCU is under reset
 DBGMCU_IDCODE_ADDR = 0xe0042000
+DBGMCU_IDCODE_ADDR_STM32LO = 0x40015800
 # FIXME: STM32L0's DBGMCU_IDCODE_ADDR is different
 
 def dbgmcu_idcode_decode(v):
-    # RM0090 for STM32F4
-    # RM0038 for STM32L1, Chp 38 Debug, Section 38.6 ID codes and locking mechanism
+    # References
+    # RM0090 for STM32F405xx/07xx and STM32F415xx/17xx, 38.6.1 "MCU device ID code", p. 1667
+    # RM0038 for STM32L1, 38.6.1
+    # RM0383 for STM32F411xC/E, 23.6.1 "MCU device ID code", p. 804
+    # RM0367 for STM32L0, 33.4.1 "MCU device ID code", p. 876
 
     # "MCU device ID code"
     rev_id   = (v >> 16) & 0xffff
@@ -20,7 +24,7 @@ def dbgmcu_idcode_decode(v):
     dev_id   = (v >> 0)  & 0xfff
 
     device_categories = {
-        # RM0090 for STM32F4, p. 1667
+        # RM0090, 38.6.1 "MCU device ID code", p. 1667
         0x413: 'STM32F405xx/07xx and STM32F415xx/17xx',
         0x419: 'STM32F42xxx and STM32F43xxx',
         # RM0038 for STM32L1 
@@ -29,12 +33,16 @@ def dbgmcu_idcode_decode(v):
         0x427: 'STM32L1 Cat.3',
         0x436: 'STM32L1 Cat.4 or Cat.3', # Special Cat.3 devices: STM32L15xxC or STM3216xxC devices with RPN ending with letter 'A', in WLCSP64 packages or with more then 100 pin.
         0x437: 'STM32L1 Cat.5',
+        # RM0383 23.6.1 "MCU device ID code", p. 804
+        0x431: 'STM32F411xC/E',
+        # RM0367 for STM32L0, 33.4.1 "MCU device ID code", p. 876
+        0x417: 'STM32L0x3',
     }
     revisions = {}
-    # STM32F4
+    # RM0090
     if dev_id == 0x413 or dev_id == 0x419:
         revisions = { 0x1000: 'Rev A', 0x1001: 'Rev Z', 0x1003: 'Rev Y', 0x1007: 'Rev 1', 0x2001: 'Rev 3' } 
-    # STM32L1
+    # RM0038
     elif dev_id == 0x416:
         revisions = { 0x1000: 'Rev A', 0x1008: 'Rev Y', 0x1038: 'Rev W', 0x1078: 'Rev V' }
     elif dev_id == 0x429:
@@ -45,6 +53,12 @@ def dbgmcu_idcode_decode(v):
         revisions = { 0x1000: 'Rev A', 0x1008: 'Rev Z', 0x1018: 'Rev Y' }
     elif dev_id == 0x437:
         revisions = { 0x1000: 'Rev A' }
+    # RM0383
+    elif dev_id == 0x431:
+        revisions = { 0x1000: 'Rev A' }
+    # RM0367
+    elif dev_id == 0x417:
+        revisions = { 0x1000: 'Rev A', 0x1008: 'Rev Z' }
 
     dev = device_categories.get(dev_id)
     rev = revisions.get(rev_id)
@@ -121,6 +135,8 @@ def openocd_stm32_target_file(mcu_info):
 def test():
     stm32l152re = 0x10006437 # ST Nucleo L152RE board
     stm32f429zit6 = 0x10036419 # STM32F429I DISCOVERY board
+    stm32f411ret6 = 0x10006431 # ST Nucleo F411RE board
+
     l = locals()
 
     experiment = True
@@ -129,7 +145,7 @@ def test():
         import pprint
         for (n, v) in l.items():
             stm32_id = dbgmcu_idcode_decode(v)
-            pprint.pprint((n, HexDict(stm32_id)))
+            print((n, HexDict(stm32_id)))
 
     d = dbgmcu_idcode_decode(stm32l152re)
     assert(d == {'dev': 'STM32L1 Cat.5',
