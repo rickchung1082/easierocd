@@ -47,6 +47,9 @@ class OpenOcdValueError(ValueError, OpenOcdError):
 class OpenOcdResetError(OpenOcdError):
     pass
 
+class OpenOcdCommandNotSupportedError(OpenOcdError):
+    pass
+
 class OpenOcdRpc(object):
     SEPARATOR = b'\x1a'
     BUFSIZE = 4096
@@ -56,7 +59,7 @@ class OpenOcdRpc(object):
         (self.host, self.port) = (host, port)
         self.msg_iter = None
         self.pid = pid
-        self.ocd_transport = None # 'jtag', 'swd', 'hla_swd' etc
+        self.ocd_transport = None # what OpenOCD's "transport select" command would return, i.e. 'jtag', 'swd', 'hla_swd' etc
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((host, port))
 
@@ -309,6 +312,19 @@ class OpenOcdRpc(object):
     def getpid(self):
         r = self.call('getpid')
         return int(r.decode('ascii'))
+
+    def target_voltage(self):
+        if self.ocd_transport.startswith('hla_'):
+            r = self.call('hla_target_voltage')
+        else:
+            raise OpenOcdCommandNotSupportedError
+
+    def firmware_version(self):
+        if self.ocd_transport.startswith('hla_'):
+            r = self.call('hla_firmware_version')
+        else:
+            raise OpenOcdCommandNotSupportedError
+        return r.strip().decode('ascii')
 
 def test():
     logging.basicConfig(level=logging.DEBUG)

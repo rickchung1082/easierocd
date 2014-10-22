@@ -1,7 +1,3 @@
-* ST-Link USB serial number
-** ST-Link: add firmware version command to OpenOCD. Warn for serial number changes to "0...1" after first use bug and request the user to update the firmeware.
-** ST-Link firmware version: V2.J21.S4 is known good ==> jtag_ver >= 21
-** See http://wunderkis.de/stlink-serialno/index.html
 * OpenOCD: expose command for ST-Link voltage detection, abort probing process early if bad unless explicityly requested
 
 	int32_t _stlink_usb_target_voltage(stlink_t *sl) {
@@ -31,3 +27,11 @@
 
 	    return voltage;
 	}
+
+DONE:
+* ST-Link USB serial number
+** ST-Link: add firmware version command to OpenOCD. Warn for serial number changes to "0...1" after first use bug and request the user to update the firmeware.
+** ST-Link firmware version: V2.J21.S4 is known good ==> jtag_ver >= 21
+** See http://wunderkis.de/stlink-serialno/index.html
+** ST-Link/V2:   http://www.st.com/web/en/catalog/tools/PF258194
+** ST-Link/V2-1: http://www.st.com/web/en/catalog/tools/PF260217

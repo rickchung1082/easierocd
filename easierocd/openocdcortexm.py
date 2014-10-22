@@ -4,10 +4,13 @@ import sys
 import os
 import logging
 
+import usb.core
+
 from easierocd.arm import dpidr_decode
 import easierocd.stm32 as stm32
 from easierocd.openocd import (OpenOcdError, TargetMemoryAccessError, TargetDapError)
 from easierocd.util import (hex_str_literal_double_quoted)
+import easierocd.usb
 
 class OpenOcdCortexMDetectError(Exception):
     pass
@@ -125,6 +128,8 @@ class OpenOcdCortexMDetect(object):
         orpc.command('adapter_khz 300')
 
     def openocd_init_for_detection(self, transport):
+        '-> adapter'
+
         self.do_openocd_init(transport)
         orpc = self.orpc
 
@@ -149,6 +154,15 @@ class OpenOcdCortexMDetect(object):
             orpc.openocd_init()
         except OpenOcdError as e:
             raise OpenOcdOpenFailedDuringInit(e.response)
+
+        # Returning 'adapter' here to work around ST-Link firmware bug
+        # where its USB serial number changes from e.g.
+        #   "\x51\xff\x6a\x6\x49\x87\x50\x53\x28\x48\x9\x87"
+        # to
+        #   "000000000001"
+        # This bus is found on the standalone ST-Link/V2 donble and the ST Discovery boards
+        d = usb.core.find(bus=self.usb_device.bus, address=self.usb_device.address)
+        return (self.adapter_info, d)
 
     def detect_dap(self):
         'Detect ARM CPU core through the Debug Access Port (assume ADI v5+)'

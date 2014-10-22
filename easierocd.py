@@ -23,7 +23,8 @@ import easierocd.openocd
 from easierocd.openocd import (OpenOcdError,
                                TargetCommunicationError,
                                TargetDapError,
-                               OpenOcdResetError)
+                               OpenOcdResetError,
+                               OpenOcdCommandNotSupportedError)
 import easierocd.arm
 from easierocd.util import (Bag,
                             HexDict,
@@ -255,7 +256,7 @@ def openocd_rpc_for_adapter(adapter):
             # driving a different debug adapter.
             try:
                 openocd_pid = orpc.getpid()
-            except OpenOcdError:
+            except (OpenOcdError, ConnectionResetError, ConnectionRefusedError):
                 openocd_pid = None
 
             if openocd_pid != pid:
@@ -310,9 +311,16 @@ def interactive_choose_adapter(options, adapters):
             break
     return adapter
 
+class OpenOcdSetupError(Exception):
+    pass
+
+class CortexMProbeFatalError(OpenOcdSetupError):
+    pass
+
 def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
     '-> (dap_info, mcu_info, openocd_rpc)'
     o = openocd_rpc
+
     mdetect = OpenOcdCortexMDetect(options, adapter, o)
 
     # Try SWD first (read IDCODE), if that fails falllback to JTAG
@@ -320,13 +328,12 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
     # to know whether the adapter supports SWD/JTAG
     openocd_transport = 'swd'
     try:
-        mdetect.openocd_init_for_detection(openocd_transport)
+        adapter = mdetect.openocd_init_for_detection(openocd_transport)
     except (OpenOcdOpenFailedDuringInit,) as e:
-        logging.error("can't open adapter: %r" % (e.args[0],))
-        sys.exit(3)
-    except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter) as e:
+        raise CortexMProbeFatalError("can't open adapter: %r" % (e.args[0],))
+    except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter):
         try_jtag = True
-    except ConnectionError:
+    except (ConnectionError):
         # protocol or connection error
         assert(o.pid is not None)
         kill_ignore_echild(o.pid, signal.SIGTERM)
@@ -334,7 +341,7 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
         time.sleep(0.01)
         (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
         mdetect = OpenOcdCortexMDetect(options, adapter, o)
-        mdetect.openocd_init_for_detection(openocd_transport)
+        adapter = mdetect.openocd_init_for_detection(openocd_transport)
 
     # OpenOCD limits 'flash bank' to config stage
     # So declare_flash_bank is called afer openocd_init_for_detection() and before openocd_init_for_cortex_m()
@@ -342,15 +349,19 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
     try:
         o.reset_halt()
     except OpenOcdResetError as e:
-        sys.stderr.write("Can't reset the target CPU. Check debug connection wiring, "
-                         "target power and hardware reset signals. Aborting.\n")
-        sys.exit(4)
+        raise CortexMProbeFatalError("Can't reset target CPU. Check your debug connection wiring, "
+                                     "target power and hardware reset signal wiring.")
 
     dap_info = None
     try:
         dap_info = mdetect.detect_dap()
     except OpenOcdCortexMDetectError as e:
-        #FIXME: if the target voltage is too low, we should give up here
+        try:
+            voltage = o.target_voltage()
+        except OpenOcdCommandNotSupportedError:
+            if voltage <= 1.5:
+                raise CortexMProbeFatalError('target voltage %f is too low. Check your debug connection wiring' %
+                                             (voltage,))
         try_jtag = True
     else:
         try_jtag = False
@@ -358,7 +369,7 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
     if try_jtag:
         openocd_transport = 'jtag'
         try:
-            mdetect.openocd_init_for_detection(openocd_transport)
+            adapter = mdetect.openocd_init_for_detection(openocd_transport)
         except (AdapterDoesntSupportTransport, OpenOcdDoesntSupportTransportForAdapter):
             dap_info = None
         else:
@@ -366,7 +377,7 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
             assert(o.pid is not None)
             kill_ignore_echild(o.pid, signal.SIGTERM)
             subprocess.call(['tmux', 'kill-session', '-t', tmux_session_name_for_adapter(adapter)])
-            mdetect.openocd_init_for_detection(openocd_transport)
+            adapter = mdetect.openocd_init_for_detection(openocd_transport)
             o.reset_init()
             try:
                 dap_info = mdetect.detect_dap()
@@ -374,8 +385,7 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
                 dap_info = None
 
     if dap_info is None:
-        sys.stderr.write('%s: failed to detect ARM Debug Access Port, aborting\n' % (program_name(),))
-        sys.exit(3)
+        raise CortexMProbeFatalError('failed to detect ARM Debug Access Port')
 
     logging.info('dap_info: %r' % (HexDict(dap_info),))
 
@@ -398,9 +408,6 @@ def intrusive_cortex_m_probe_and_setup(options, adapter, openocd_rpc):
     mdetect.openocd_init_for_cortex_m(openocd_transport, dap_info, mcu_info)
     # OpenOCD gdbserver is up after 'init'
     return (dap_info, mcu_info, o)
-
-class OpenOcdSetupError(Exception):
-    pass
 
 def openocd_setup(options):
     '-> (adapter, dap_info, mcu_info, openocd_rpc)'
@@ -467,11 +474,28 @@ def openocd_setup(options):
                                         "Use command line options or environment variables to choose one from:\n" +
                                         multiple_adapter_msg(adapters))
 
+    # The debug adapter to be used is fixed after this point
+
     # Doing pid file and tmux session cleanups here is bit hackish
     adapters = easierocd.usb.connected_debug_adapters()
     pid_files_cleanup(adapters)
     tmux_sessions_cleanup(adapters)
     
+    # If multiple debug adapters have the same serial number as the choosen one
+    # raise MultipleAdaptersMatchCriteria here
+    adapter_serial_number = getattr(adapter[1], 'serial_number')
+    if adapter_serial_number is not None:
+        try:
+            easierocd.usb.adapter_by_usb_serial(adapter_serial_number)
+        except (MultipleAdaptersMatchCriteria) as e:
+            if adapter[0]['name'] == 'St-Link/V2-1':
+                msg = 'http://www.st.com/web/en/catalog/tools/PF260217'
+            else:
+                msg = 'http://www.st.com/web/en/catalog/tools/PF258194'
+            raise OpenOcdSetupError('Your ST-Link debug adapter has a known bug where the USB serial number changes after first use '
+                                         'that makes it impossible to use multiple ST-Links on the same machine.\n'
+                                         'Please upgrade ST-Link\'s firmware from: ' + msg)
+
     (o, openocd_newly_started_or_not) = openocd_rpc_for_adapter(adapter)
     logging.debug('openocd_newly_started_or_not: %d' % (openocd_newly_started_or_not,))
 
@@ -628,6 +652,8 @@ def eocd_gdb(args):
     try:
         (adapter, dap_info, mcu_info, o) = openocd_setup(options)
     except OpenOcdSetupError as e:
+        sys.stderr.write(program_name())
+        sys.stderr.write(': ')
         sys.stderr.write(e.args[0])
         sys.stderr.write('\n')
         sys.exit(3)
