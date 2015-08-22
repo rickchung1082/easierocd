@@ -8,8 +8,8 @@ import doctest
 # MCU Device ID Code: MCU part number and revision.
 # Available even while MCU is under reset
 DBGMCU_IDCODE_ADDR = 0xe0042000
-DBGMCU_IDCODE_ADDR_STM32LO = 0x40015800
-# FIXME: STM32L0's DBGMCU_IDCODE_ADDR is different
+# NOTE: STM32 L0 and F0's DBGMCU_IDCODE_ADDR is different
+DBGMCU_IDCODE_ADDR_STM32L0F0 = 0x40015800
 
 def dbgmcu_idcode_decode(v):
     # References
@@ -37,6 +37,27 @@ def dbgmcu_idcode_decode(v):
         0x431: 'STM32F411xC/E',
         # RM0367 for STM32L0, 33.4.1 "MCU device ID code", p. 876
         0x417: 'STM32L0x3',
+        # RM0360 for STM32F030x4/6/8/C and STM32F070x6/B, 26.4.1 "MCU device ID code", p. 710
+        0x444: 'STM32F030x4 and STM32F070x6',
+        0x445: 'STM32F070x6',
+        0x440: 'STM32F070x8',
+        0x448: 'STM32F070xB',
+        0x442: 'STM32F070xC',
+        # RM0368 for STM32F401xB/C and STM32F401xD/E, 23.6.1 "MCU device ID code", p. 807
+        0x423: 'STM32F401xB/C',
+        0x433: 'STM32F401xD/E',
+        # RM0008 for STM32F101xx, STM32F102xx, STM32F103xx, STM32F105xx and STM32F107xx, 31.6.1 "MCU device ID code", p. 1076
+        0x412: 'STM32F1 low-density devices',
+        0x410: 'STM32F1 medium-density devices',
+        0x414: 'STM32F1 high-density devices',
+        0x430: 'STM32F1 XL-density devices',
+        0x418: 'STM32F1 connectivity devices',
+        # RM0316 for STM32F303xB/C/D/E, STM32F303x6/8, STM32F328x8, STM32F358xC, STM32F398xE, 33.6.1 "MCU device ID code", p. 1100
+        0x422: 'STM32F303xB/C and STM32F358',
+        0x438: 'STM32F303x6/8 and STM32F328',
+        0x446: 'STM32F303xD/E and STM32F398xE',
+
+
     }
     revisions = {}
     # RM0090
@@ -59,7 +80,30 @@ def dbgmcu_idcode_decode(v):
     # RM0367
     elif dev_id == 0x417:
         revisions = { 0x1000: 'Rev A', 0x1008: 'Rev Z' }
+    # RM0360   
+    elif dev_id in [0x444, 0x445, 0x440, 0x448, 0x442]:
+        revisions = { 0x1000: 'Rev 1.0', 0x2000: 'Rev 2.0'}
+    # RM0368
+    elif dev_id == 0x423:
+        revisions = { 0x1000: 'Rev Z', 0x1001: 'Rev A'}
+    elif dev_id == 0x433:
+        revisions = { 0x1000: 'Rev A', 0x1001: 'Rev Z'}
+    # RM0008
+    elif dev_id == 0x412:
+        revisions = { 0x1000: 'Rev A'}
+    elif dev_id == 0x410:
+        revisions = { 0x0000: 'Rev A', 0x2000: 'Rev B', 0x2001: 'Rev Z', 0x2003: 'Rev Y, 1, 2 or X'}
+    elif dev_id == 0x414:
+        revisions = { 0x1000: 'Rev A or 1', 0x1001: 'Rev Z', 0x1003: 'Rev Y, 1, 2 or X'}
+    elif dev_id == 0x430:
+        revisions = { 0x1000: 'Rev A'}
+    elif dev_id == 0x418:
+        revisions = { 0x1000: 'Rev A', 0x1001: 'Rev Z'}
+    # RM0316
+    elif dev_id in [0x422, 0x438, 0x446]:
+        revisions = {0x1000: 'Rev A'}
 
+    
     dev = device_categories.get(dev_id)
     rev = revisions.get(rev_id)
     return dict(dev_id=dev_id, rev_id=rev_id, dev=dev, rev=rev)
